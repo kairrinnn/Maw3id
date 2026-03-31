@@ -10,7 +10,7 @@ export default async function DashboardPage() {
   }
 
   const claims = claimsData.claims as Record<string, unknown>
-  const tenantId = claims.tenant_id as string | null
+const tenantId = claims.tenant_id as string | null
 
   let tenantName = 'Aucun salon lié'
   let botActive = false
