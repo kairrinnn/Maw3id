@@ -32,7 +32,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. All tenant-owned tables have RLS enabled with default DENY — a cross-tenant query returns zero rows
   3. Tenant A's bookings, services, and conversations are invisible to Tenant B even with a valid auth token
   4. A salon can have its own bot configuration stored (system prompt, services list, opening hours, active status)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 01-01-PLAN.md — Bootstrap project, schema migrations, RLS policies, test infrastructure
+- [ ] 01-02-PLAN.md — Auth flow (signup/login), middleware, dashboard shell, bot config scoping
 
 ### Phase 2: Webhook Pipeline
 **Goal**: WhatsApp messages reach the correct tenant's bot and the bot replies via text, with no LLM involved
@@ -116,7 +119,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/? | Not started | - |
+| 1. Foundation | 0/2 | Planning complete | - |
 | 2. Webhook Pipeline | 0/? | Not started | - |
 | 3. LLM Intent Engine | 0/? | Not started | - |
 | 4. Booking Core | 0/? | Not started | - |
