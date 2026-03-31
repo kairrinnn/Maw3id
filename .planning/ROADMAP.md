@@ -12,7 +12,7 @@ Eight phases that build the product in strict dependency order. The foundation (
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Multi-tenant schema, RLS isolation, Supabase Auth, and per-tenant bot config
+- [x] **Phase 1: Foundation** - Multi-tenant schema, RLS isolation, Supabase Auth, and per-tenant bot config (completed 2026-03-31)
 - [ ] **Phase 2: Webhook Pipeline** - Rule-based FSM webhook handler with tenant routing and Meta API send
 - [ ] **Phase 3: LLM Intent Engine** - Natural language extraction layer on top of working FSM
 - [ ] **Phase 4: Booking Core** - Full booking CRUD with conflict prevention, modify, cancel, and notifications
@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. All tenant-owned tables have RLS enabled with default DENY — a cross-tenant query returns zero rows
   3. Tenant A's bookings, services, and conversations are invisible to Tenant B even with a valid auth token
   4. A salon can have its own bot configuration stored (system prompt, services list, opening hours, active status)
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 01-01-PLAN.md — Bootstrap project, schema migrations, RLS policies, test infrastructure
 - [ ] 01-02-PLAN.md — Auth flow (signup/login), middleware, dashboard shell, bot config scoping
@@ -119,7 +119,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/2 | Planning complete | - |
+| 1. Foundation | 2/2 | Complete   | 2026-03-31 |
 | 2. Webhook Pipeline | 0/? | Not started | - |
 | 3. LLM Intent Engine | 0/? | Not started | - |
 | 4. Booking Core | 0/? | Not started | - |

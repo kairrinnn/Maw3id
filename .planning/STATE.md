@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Roadmap created and written to disk. Ready to plan Phase 1.
-last_updated: "2026-03-31T17:31:54.250Z"
-last_activity: 2026-03-31 — Roadmap created (8 phases, 30/30 requirements mapped)
+status: executing
+stopped_at: Completed 01-02-PLAN.md — auth flow, dashboard shell, signout route all done. Phase 1 complete.
+last_updated: "2026-03-31T22:47:06.796Z"
+last_activity: 2026-03-31 — Completed 01-02 (auth flow, dashboard shell, signout route, 28 tests green)
 progress:
   total_phases: 8
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 50
 ---
 
@@ -25,28 +25,28 @@ See: .planning/PROJECT.md (updated 2026-03-30)
 
 ## Current Position
 
-Phase: 1 of 8 (Foundation)
-Plan: 1 of 2 in current phase (01-01 complete)
-Status: In progress
-Last activity: 2026-03-31 — Completed 01-01 (Next.js bootstrap, Supabase schema, RLS, TypeScript types)
+Phase: 1 of 8 (Foundation) — COMPLETE
+Plan: 2 of 2 in current phase (01-01 and 01-02 complete)
+Status: Phase 1 complete, ready for Phase 2
+Last activity: 2026-03-31 — Completed 01-02 (auth flow, dashboard shell, signout route, tests)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 8 min
-- Total execution time: 0.13 hours
+- Total plans completed: 2
+- Average duration: 11.5 min
+- Total execution time: 0.38 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation | 1 | 8 min | 8 min |
+| 01-foundation | 2 | 23 min | 11.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (8 min)
+- Last 5 plans: 01-01 (8 min), 01-02 (15 min)
 - Trend: establishing baseline
 
 *Updated after each plan completion*
@@ -65,6 +65,9 @@ Recent decisions affecting current work:
 - [01-01] RLS policies use SELECT-wrapped jwt_tenant_id() for per-statement Postgres caching (not per-row)
 - [01-01] Service role client uses SUPABASE_SERVICE_ROLE_KEY (no NEXT_PUBLIC_ prefix) — never browser-exposed
 - [01-01] custom_access_token_hook declared STABLE — reads tenant_users once at login, not on every query
+- [Phase 01-02]: getClaims() used over getSession() — getSession() does not validate JWT signature server-side (security vulnerability)
+- [Phase 01-02]: Signup action uses service client for tenant provisioning — new user JWT has no tenant_id yet, RLS would deny inserts without service role
+- [Phase 01-02]: bot_config created with active=false at signup — prevents bot responding before owner completes setup
 
 ### Pending Todos
 
@@ -78,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31
-Stopped at: Completed 01-01-PLAN.md — Next.js bootstrap, Supabase schema migrations, RLS, TypeScript types all done. Ready to execute 01-02.
+Last session: 2026-03-31T22:47:06.792Z
+Stopped at: Completed 01-02-PLAN.md — auth flow, dashboard shell, signout route all done. Phase 1 complete.
 Resume file: None
