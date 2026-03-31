@@ -13,6 +13,9 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
+  // Redirect root / to /dashboard
+
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="border-b bg-white px-6 py-4">
