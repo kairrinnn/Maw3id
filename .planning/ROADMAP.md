@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. A salon can have its own bot configuration stored (system prompt, services list, opening hours, active status)
 **Plans:** 2 plans
 Plans:
-- [ ] 01-01-PLAN.md — Bootstrap project, schema migrations, RLS policies, test infrastructure
+- [x] 01-01-PLAN.md — Bootstrap project, schema migrations, RLS policies, test infrastructure
 - [ ] 01-02-PLAN.md — Auth flow (signup/login), middleware, dashboard shell, bot config scoping
 
 ### Phase 2: Webhook Pipeline

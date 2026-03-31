@@ -7,10 +7,10 @@
 
 ### Infrastructure & Multi-Tenant
 
-- [ ] **INFRA-01**: Schéma Postgres multi-tenant avec `tenant_id` indexé sur toutes les tables (tenants, bookings, services, conversations, templates)
-- [ ] **INFRA-02**: RLS Supabase activé par défaut DENY — chaque salon ne peut lire/écrire que ses propres données
+- [x] **INFRA-01**: Schéma Postgres multi-tenant avec `tenant_id` indexé sur toutes les tables (tenants, bookings, services, conversations, templates)
+- [x] **INFRA-02**: RLS Supabase activé par défaut DENY — chaque salon ne peut lire/écrire que ses propres données
 - [ ] **INFRA-03**: Salon owner peut créer un compte et se connecter au dashboard (Supabase Auth email/password)
-- [ ] **INFRA-04**: Chaque salon a une configuration bot propre (prompt système, services, horaires, statut actif/inactif)
+- [x] **INFRA-04**: Chaque salon a une configuration bot propre (prompt système, services, horaires, statut actif/inactif)
 - [ ] **INFRA-05**: Webhook router identifie le tenant à partir du `phone_number_id` Meta et route le message vers la bonne config
 
 ### WhatsApp Integration
@@ -101,10 +101,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 1 | Pending |
-| INFRA-02 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
+| INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 1 | Pending |
-| INFRA-04 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Complete |
 | INFRA-05 | Phase 2 | Pending |
 | WA-01 | Phase 2 | Pending |
 | WA-02 | Phase 2 | Pending |

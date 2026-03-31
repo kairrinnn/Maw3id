@@ -1,3 +1,19 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: planning
+stopped_at: Roadmap created and written to disk. Ready to plan Phase 1.
+last_updated: "2026-03-31T17:31:54.250Z"
+last_activity: 2026-03-31 — Roadmap created (8 phases, 30/30 requirements mapped)
+progress:
+  total_phases: 8
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 1
+  percent: 50
+---
+
 # Project State
 
 ## Project Reference
@@ -10,28 +26,28 @@ See: .planning/PROJECT.md (updated 2026-03-30)
 ## Current Position
 
 Phase: 1 of 8 (Foundation)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-03-31 — Roadmap created (8 phases, 30/30 requirements mapped)
+Plan: 1 of 2 in current phase (01-01 complete)
+Status: In progress
+Last activity: 2026-03-31 — Completed 01-01 (Next.js bootstrap, Supabase schema, RLS, TypeScript types)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 8 min
+- Total execution time: 0.13 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-foundation | 1 | 8 min | 8 min |
 
 **Recent Trend:**
-- Last 5 plans: —
-- Trend: —
+- Last 5 plans: 01-01 (8 min)
+- Trend: establishing baseline
 
 *Updated after each plan completion*
 
@@ -46,6 +62,9 @@ Recent decisions affecting current work:
 - Infra: Per-tenant WABA (not shared) — isolates suspension blast radius
 - Stack: Meta Cloud API direct (no Twilio/WATI) — avoids reseller margins
 - Timing: Templates submitted at onboarding Day 1 — Meta approval (1-7 days) cannot be reactive
+- [01-01] RLS policies use SELECT-wrapped jwt_tenant_id() for per-statement Postgres caching (not per-row)
+- [01-01] Service role client uses SUPABASE_SERVICE_ROLE_KEY (no NEXT_PUBLIC_ prefix) — never browser-exposed
+- [01-01] custom_access_token_hook declared STABLE — reads tenant_users once at login, not on every query
 
 ### Pending Todos
 
@@ -60,5 +79,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-31
-Stopped at: Roadmap created and written to disk. Ready to plan Phase 1.
+Stopped at: Completed 01-01-PLAN.md — Next.js bootstrap, Supabase schema migrations, RLS, TypeScript types all done. Ready to execute 01-02.
 Resume file: None
