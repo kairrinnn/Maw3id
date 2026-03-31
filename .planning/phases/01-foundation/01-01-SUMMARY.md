@@ -168,6 +168,10 @@ For local development: `npx supabase start` (requires Docker) then run migration
 - Webhook handler can use `src/lib/supabase/service.ts` to bypass RLS for incoming WhatsApp events
 - Integration tests in schema.test.ts and rls.test.ts will activate once Supabase local dev is running
 
+## Self-Check: PASSED
+
+All required files exist on disk. Both task commits (8fd771d, dada635) present in git history.
+
 ---
 *Phase: 01-foundation*
 *Completed: 2026-03-31*
