@@ -11,12 +11,12 @@
 - [x] **INFRA-02**: RLS Supabase activé par défaut DENY — chaque salon ne peut lire/écrire que ses propres données
 - [x] **INFRA-03**: Salon owner peut créer un compte et se connecter au dashboard (Supabase Auth email/password)
 - [x] **INFRA-04**: Chaque salon a une configuration bot propre (prompt système, services, horaires, statut actif/inactif)
-- [ ] **INFRA-05**: Webhook router identifie le tenant à partir du `phone_number_id` Meta et route le message vers la bonne config
+- [x] **INFRA-05**: Webhook router identifie le tenant à partir du `phone_number_id` Meta et route le message vers la bonne config
 
 ### WhatsApp Integration
 
-- [ ] **WA-01**: Endpoint webhook GET retourne `hub.challenge` si `hub.verify_token` correspond (Meta verification)
-- [ ] **WA-02**: Endpoint webhook POST traite les messages entrants avec déduplication via `wamid` (unique constraint DB)
+- [x] **WA-01**: Endpoint webhook GET retourne `hub.challenge` si `hub.verify_token` correspond (Meta verification)
+- [x] **WA-02**: Endpoint webhook POST traite les messages entrants avec déduplication via `wamid` (unique constraint DB)
 - [ ] **WA-03**: Bot peut envoyer des messages texte et des templates WhatsApp via Meta Cloud API
 - [ ] **WA-04**: Admin peut connecter un numéro WhatsApp au salon (option numéro dédié ou coexistence)
 

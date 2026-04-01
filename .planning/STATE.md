@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Completed 01-02-PLAN.md — auth flow, dashboard shell, signout route all done. Phase 1 complete.
-last_updated: "2026-04-01T00:15:26.745Z"
-last_activity: 2026-03-31 — Completed 01-02 (auth flow, dashboard shell, signout route, tests)
+status: in-progress
+stopped_at: Completed 02-01-PLAN.md — webhook handler, tenant routing, deduplication done. Phase 2 plan 1 complete.
+last_updated: "2026-04-01T07:09:20Z"
+last_activity: 2026-04-01 — Completed 02-01 (webhook GET+POST, processed_messages migration, WhatsApp types)
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 100
+  total_plans: 3
+  completed_plans: 3
+  percent: 25
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-30)
 
 **Core value:** Un client peut réserver un créneau au salon à n'importe quelle heure, et le salon ne rate plus aucun rendez-vous faute de réponse manuelle.
-**Current focus:** Phase 1 — Foundation
+**Current focus:** Phase 2 — Webhook Pipeline
 
 ## Current Position
 
-Phase: 1 of 8 (Foundation) — COMPLETE
-Plan: 2 of 2 in current phase (01-01 and 01-02 complete)
-Status: Phase 1 complete, ready for Phase 2
-Last activity: 2026-03-31 — Completed 01-02 (auth flow, dashboard shell, signout route, tests)
+Phase: 2 of 8 (Webhook Pipeline) — IN PROGRESS
+Plan: 1 of 2 in current phase (02-01 complete, 02-02 next)
+Status: Phase 2 plan 1 complete, ready for Plan 02-02 (send helper + stub reply)
+Last activity: 2026-04-01 — Completed 02-01 (webhook GET+POST, processed_messages migration, WhatsApp types)
 
-Progress: [██████████] 100%
+Progress: [██░░░░░░░░] 25% (3 of ~16 plans complete across all phases)
 
 ## Performance Metrics
 
@@ -44,10 +44,11 @@ Progress: [██████████] 100%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 2 | 23 min | 11.5 min |
+| 02-webhook-pipeline | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (8 min), 01-02 (15 min)
-- Trend: establishing baseline
+- Last 5 plans: 01-01 (8 min), 01-02 (15 min), 02-01 (3 min)
+- Trend: webhook plan was tight-scoped, fast execution
 
 *Updated after each plan completion*
 
@@ -68,6 +69,10 @@ Recent decisions affecting current work:
 - [Phase 01-02]: getClaims() used over getSession() — getSession() does not validate JWT signature server-side (security vulnerability)
 - [Phase 01-02]: Signup action uses service client for tenant provisioning — new user JWT has no tenant_id yet, RLS would deny inserts without service role
 - [Phase 01-02]: bot_config created with active=false at signup — prevents bot responding before owner completes setup
+- [02-01]: upsert(ignoreDuplicates:true, count:'exact') for dedup — .insert().onConflict().ignore() not valid in Supabase JS v2
+- [02-01]: Non-text messages get French polite reply rather than silent drop — client must know bot is text-only
+- [02-01]: processMessage() extracted as separate function — Plan 02-02 replaces sendStubReply without touching route logic
+- [02-01]: Meta must always receive 200 — unknown phone_number_id and inactive bot both return 200 silently to prevent retries
 
 ### Pending Todos
 
@@ -81,6 +86,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T22:47:06.792Z
-Stopped at: Completed 01-02-PLAN.md — auth flow, dashboard shell, signout route all done. Phase 1 complete.
+Last session: 2026-04-01T07:09:20Z
+Stopped at: Completed 02-01-PLAN.md — webhook handler, tenant routing, deduplication done. Phase 2 plan 1 complete.
 Resume file: None
