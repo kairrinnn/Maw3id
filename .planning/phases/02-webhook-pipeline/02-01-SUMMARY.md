@@ -116,6 +116,16 @@ None — no external service configuration required for this plan. WHATSAPP_API_
 - Phase 3 FSM can receive messages via `processMessage()` once send.ts is ready
 - processed_messages migration must be applied to Supabase before live testing
 
+## Self-Check: PASSED
+
+- migration file: FOUND at salon-bot/supabase/migrations/20260401000001_processed_messages.sql
+- service.ts: FOUND at salon-bot/src/lib/supabase/service.ts (preserved from Phase 1)
+- types.ts: FOUND at salon-bot/src/lib/whatsapp/types.ts
+- route.ts: FOUND at salon-bot/src/app/api/webhook/route.ts
+- webhook.test.ts: FOUND at salon-bot/tests/webhook.test.ts
+- SUMMARY.md: FOUND at .planning/phases/02-webhook-pipeline/02-01-SUMMARY.md
+- Commits verified: 2bbecda, f1cfc07, 3f33e0d, a7e7006
+
 ---
 *Phase: 02-webhook-pipeline*
 *Completed: 2026-04-01*
