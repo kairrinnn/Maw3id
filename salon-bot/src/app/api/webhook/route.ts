@@ -1,4 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/service'
+import { sendTextMessage } from '@/lib/whatsapp/send'
+import { verifyWebhookSignature } from '@/lib/whatsapp/verify'
 import type { WebhookPayload, WebhookMessage } from '@/lib/whatsapp/types'
 
 export async function GET(request: Request) {
@@ -14,9 +16,22 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  // 1. Read raw body as string (required for signature verification)
+  const rawBody = await request.text()
+
+  // 2. Verify signature unless explicitly skipped (dev/test)
+  if (process.env.SKIP_WEBHOOK_SIGNATURE !== 'true') {
+    const signature = request.headers.get('x-hub-signature-256') ?? ''
+    const appSecret = process.env.WHATSAPP_APP_SECRET ?? ''
+    if (!verifyWebhookSignature(rawBody, signature, appSecret)) {
+      return new Response('Unauthorized', { status: 401 })
+    }
+  }
+
+  // 3. Parse JSON after signature check
   let body: WebhookPayload
   try {
-    body = await request.json()
+    body = JSON.parse(rawBody)
   } catch {
     return new Response('OK', { status: 200 })
   }
@@ -110,30 +125,5 @@ async function processMessage(
     replyText = 'Bonjour! Je suis en cours de configuration.'
   }
 
-  // Phase 2 stub — replaced by src/lib/whatsapp/send.ts in Plan 02-02
-  await sendStubReply(clientWaId, replyText, phoneNumberId)
-}
-
-// Phase 2 stub — replaced by src/lib/whatsapp/send.ts in Plan 02-02
-async function sendStubReply(to: string, body: string, phoneNumberId: string) {
-  const token = process.env.WHATSAPP_API_TOKEN
-  const version = process.env.WHATSAPP_API_VERSION ?? 'v19.0'
-  if (!token) {
-    console.warn('[webhook] WHATSAPP_API_TOKEN not set — skipping reply')
-    return
-  }
-  await fetch(`https://graph.facebook.com/${version}/${phoneNumberId}/messages`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
-      to,
-      type: 'text',
-      text: { preview_url: false, body },
-    }),
-  })
+  await sendTextMessage(clientWaId, replyText, phoneNumberId)
 }

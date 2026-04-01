@@ -16,6 +16,11 @@ vi.mock('@/lib/supabase/service', () => ({
   createServiceClient: vi.fn(() => mockSupabase),
 }))
 
+// Mock sendTextMessage so route tests don't make real fetch calls
+vi.mock('@/lib/whatsapp/send', () => ({
+  sendTextMessage: vi.fn().mockResolvedValue('wamid.MOCK_REPLY'),
+}))
+
 // Helper to build a fluent chain mock that returns a specific value at the end
 function buildChain(returnValue: unknown) {
   const chain: Record<string, unknown> = {}
@@ -86,8 +91,9 @@ function makeRequest(method: 'GET' | 'POST', url: string, body?: unknown): Reque
   })
 }
 
-// Import handlers after mocks are set up
+// Import handlers and mocked dependencies after mocks are set up
 import { GET, POST } from '@/app/api/webhook/route'
+import { sendTextMessage } from '@/lib/whatsapp/send'
 
 describe('GET /api/webhook - Meta verification', () => {
   beforeEach(() => {
@@ -119,7 +125,8 @@ describe('GET /api/webhook - Meta verification', () => {
 describe('POST /api/webhook - message processing', () => {
   beforeEach(() => {
     process.env.WEBHOOK_VERIFY_TOKEN = 'test-verify-token-secret'
-    process.env.WHATSAPP_API_TOKEN = '' // disable actual fetch calls in stub
+    // Skip signature verification in unit tests
+    process.env.SKIP_WEBHOOK_SIGNATURE = 'true'
     vi.clearAllMocks()
     // Default from() returns a fluent chain
     mockFrom.mockImplementation(() => ({
@@ -133,6 +140,7 @@ describe('POST /api/webhook - message processing', () => {
       eq: mockEq,
       single: mockSingle,
     }))
+    vi.mocked(sendTextMessage).mockResolvedValue('wamid.MOCK_REPLY')
   })
 
   it('returns 200 immediately for status update (no messages array)', async () => {
@@ -223,22 +231,27 @@ describe('POST /api/webhook - message processing', () => {
       // upsert conversations
       .mockResolvedValueOnce({ data: null, error: null })
 
-    // Spy on sendStubReply via fetch — stub should be called with non-text reply
-    const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce(new Response('{}', { status: 200 }))
-
-    // Set a token so sendStubReply doesn't skip
-    process.env.WHATSAPP_API_TOKEN = 'test-wa-token'
-
     const payload = makePayload({ messageType: 'image', wamid: 'wamid.image.001' })
     const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
     const res = await POST(req)
     expect(res.status).toBe(200)
 
-    // Check fetch was called with the non-text message body
-    expect(fetchSpy).toHaveBeenCalledOnce()
-    const fetchBody = JSON.parse(fetchSpy.mock.calls[0][1]?.body as string)
-    expect(fetchBody.text.body).toBe('Je ne peux traiter que les messages texte pour le moment.')
+    // Check sendTextMessage was called with the non-text reply body
+    expect(vi.mocked(sendTextMessage)).toHaveBeenCalledOnce()
+    expect(vi.mocked(sendTextMessage).mock.calls[0][1]).toBe(
+      'Je ne peux traiter que les messages texte pour le moment.'
+    )
+  })
 
-    fetchSpy.mockRestore()
+  it('returns 401 when signature is invalid and SKIP_WEBHOOK_SIGNATURE is not set', async () => {
+    delete process.env.SKIP_WEBHOOK_SIGNATURE
+    const payload = makePayload()
+    const req = new Request('http://localhost/api/webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-hub-signature-256': 'sha256=invalid' },
+      body: JSON.stringify(payload),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(401)
   })
 })
