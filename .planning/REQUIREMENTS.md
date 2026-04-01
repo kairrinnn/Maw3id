@@ -17,7 +17,7 @@
 
 - [x] **WA-01**: Endpoint webhook GET retourne `hub.challenge` si `hub.verify_token` correspond (Meta verification)
 - [x] **WA-02**: Endpoint webhook POST traite les messages entrants avec déduplication via `wamid` (unique constraint DB)
-- [ ] **WA-03**: Bot peut envoyer des messages texte et des templates WhatsApp via Meta Cloud API
+- [x] **WA-03**: Bot peut envoyer des messages texte et des templates WhatsApp via Meta Cloud API
 - [ ] **WA-04**: Admin peut connecter un numéro WhatsApp au salon (option numéro dédié ou coexistence)
 
 ### Bot / LLM Engine
@@ -108,7 +108,7 @@
 | INFRA-05 | Phase 2 | Pending |
 | WA-01 | Phase 2 | Pending |
 | WA-02 | Phase 2 | Pending |
-| WA-03 | Phase 2 | Pending |
+| WA-03 | Phase 2 | Complete |
 | WA-04 | Phase 7 | Pending |
 | BOT-01 | Phase 3 | Pending |
 | BOT-02 | Phase 3 | Pending |

@@ -13,7 +13,7 @@ Eight phases that build the product in strict dependency order. The foundation (
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Multi-tenant schema, RLS isolation, Supabase Auth, and per-tenant bot config (completed 2026-03-31)
-- [ ] **Phase 2: Webhook Pipeline** - Rule-based FSM webhook handler with tenant routing and Meta API send
+- [x] **Phase 2: Webhook Pipeline** - Rule-based FSM webhook handler with tenant routing and Meta API send (completed 2026-04-01)
 - [ ] **Phase 3: LLM Intent Engine** - Natural language extraction layer on top of working FSM
 - [ ] **Phase 4: Booking Core** - Full booking CRUD with conflict prevention, modify, cancel, and notifications
 - [ ] **Phase 5: Templates & Reminders** - Meta-approved template management and 24h reminder scheduler
@@ -46,7 +46,10 @@ Plans:
   2. An incoming WhatsApp message is routed to the correct tenant by phone_number_id within the same request
   3. Sending the same WhatsApp message ID twice does not create a duplicate booking or send a duplicate reply
   4. The bot sends a text reply back to the client via Meta Cloud API
-**Plans**: TBD
+**Plans:** 2/2 plans complete
+Plans:
+- [ ] 02-01-PLAN.md — Webhook route (GET + POST), tenant routing, deduplication, processed_messages migration
+- [ ] 02-02-PLAN.md — sendTextMessage helper, HMAC-SHA256 signature verification, env var documentation
 
 ### Phase 3: LLM Intent Engine
 **Goal**: The bot understands natural language inputs in French and approximate Darija, extracting structured booking intent without sending raw history to the model
@@ -120,7 +123,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-31 |
-| 2. Webhook Pipeline | 0/? | Not started | - |
+| 2. Webhook Pipeline | 2/2 | Complete   | 2026-04-01 |
 | 3. LLM Intent Engine | 0/? | Not started | - |
 | 4. Booking Core | 0/? | Not started | - |
 | 5. Templates & Reminders | 0/? | Not started | - |

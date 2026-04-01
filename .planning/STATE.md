@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 02-01-PLAN.md — webhook handler, tenant routing, deduplication done. Phase 2 plan 1 complete.
-last_updated: "2026-04-01T07:09:20Z"
-last_activity: 2026-04-01 — Completed 02-01 (webhook GET+POST, processed_messages migration, WhatsApp types)
+stopped_at: Completed 02-02-PLAN.md — sendTextMessage helper, verifyWebhookSignature, route.ts updated. Phase 2 complete.
+last_updated: "2026-04-01T07:17:00Z"
+last_activity: 2026-04-01 — Completed 02-02 (send.ts, verify.ts, route.ts signature gate, 46 tests passing)
 progress:
   total_phases: 8
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 25
+  completed_phases: 2
+  total_plans: 4
+  completed_plans: 4
+  percent: 31
 ---
 
 # Project State
@@ -25,29 +25,29 @@ See: .planning/PROJECT.md (updated 2026-03-30)
 
 ## Current Position
 
-Phase: 2 of 8 (Webhook Pipeline) — IN PROGRESS
-Plan: 1 of 2 in current phase (02-01 complete, 02-02 next)
-Status: Phase 2 plan 1 complete, ready for Plan 02-02 (send helper + stub reply)
-Last activity: 2026-04-01 — Completed 02-01 (webhook GET+POST, processed_messages migration, WhatsApp types)
+Phase: 2 of 8 (Webhook Pipeline) — COMPLETE
+Plan: 2 of 2 in Phase 2 (both complete)
+Status: Phase 2 complete — ready for Phase 3 (FSM + conversation state machine)
+Last activity: 2026-04-01 — Completed 02-02 (send.ts, verify.ts, route.ts signature gate, 46 tests passing)
 
-Progress: [██░░░░░░░░] 25% (3 of ~16 plans complete across all phases)
+Progress: [███░░░░░░░] 31% (4 of ~16 plans complete across all phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 11.5 min
-- Total execution time: 0.38 hours
+- Total plans completed: 4
+- Average duration: 8.5 min
+- Total execution time: 0.57 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 2 | 23 min | 11.5 min |
-| 02-webhook-pipeline | 1 | 3 min | 3 min |
+| 02-webhook-pipeline | 2 | 7 min | 3.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (8 min), 01-02 (15 min), 02-01 (3 min)
+- Last 5 plans: 01-01 (8 min), 01-02 (15 min), 02-01 (3 min), 02-02 (4 min)
 - Trend: webhook plan was tight-scoped, fast execution
 
 *Updated after each plan completion*
@@ -73,6 +73,9 @@ Recent decisions affecting current work:
 - [02-01]: Non-text messages get French polite reply rather than silent drop — client must know bot is text-only
 - [02-01]: processMessage() extracted as separate function — Plan 02-02 replaces sendStubReply without touching route logic
 - [02-01]: Meta must always receive 200 — unknown phone_number_id and inactive bot both return 200 silently to prevent retries
+- [02-02]: sendTextMessage throws on non-200 (not silent skip) — caller decides whether to swallow errors
+- [02-02]: SKIP_WEBHOOK_SIGNATURE env var bypasses signature check in dev/test; must never be set in prod
+- [02-02]: webhook.test.ts mocks sendTextMessage entirely (not fetch) — route tests stay focused on routing/DB logic
 
 ### Pending Todos
 
@@ -86,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T07:09:20Z
-Stopped at: Completed 02-01-PLAN.md — webhook handler, tenant routing, deduplication done. Phase 2 plan 1 complete.
+Last session: 2026-04-01T07:17:00Z
+Stopped at: Completed 02-02-PLAN.md — sendTextMessage helper, verifyWebhookSignature, route.ts signature gate. Phase 2 complete.
 Resume file: None
