@@ -60,7 +60,11 @@ Plans:
   2. Simple intents (clear service + date) route to the cheap model; ambiguous or failed extractions escalate to the standard model
   3. A completely unrecognized input receives a graceful fallback reply that does not leave the client in silence
   4. Conversation state stored in DB contains only structured fields (step, service_id, date, time, status) — never raw message history
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 03-01-PLAN.md — LLM intent extraction layer: Zod schemas, dual-model clients (Gemini + OpenAI), routing logic
+- [ ] 03-02-PLAN.md — FSM state machine: date resolver, state persistence, transition function
+- [ ] 03-03-PLAN.md — Wire LLM + FSM into webhook route, replace Phase 2 stub, BOT-03 fallback tests
 
 ### Phase 4: Booking Core
 **Goal**: Clients can book, modify, and cancel appointments end-to-end through WhatsApp with no double-bookings
@@ -118,13 +122,13 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-31 |
 | 2. Webhook Pipeline | 2/2 | Complete   | 2026-04-01 |
-| 3. LLM Intent Engine | 0/? | Not started | - |
+| 3. LLM Intent Engine | 0/3 | Planned | - |
 | 4. Booking Core | 0/? | Not started | - |
 | 5. Templates & Reminders | 0/? | Not started | - |
 | 6. Dashboard Admin | 0/? | Not started | - |
