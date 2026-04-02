@@ -11,7 +11,7 @@ export async function sendTextMessage(
   phoneNumberId: string
 ): Promise<string> {
   const token = process.env.WHATSAPP_API_TOKEN!
-  const version = process.env.WHATSAPP_API_VERSION || 'v19.0'
+  const version = process.env.WHATSAPP_API_VERSION || 'v21.0'
   const url = `https://graph.facebook.com/${version}/${phoneNumberId}/messages`
 
   const response = await fetch(url, {

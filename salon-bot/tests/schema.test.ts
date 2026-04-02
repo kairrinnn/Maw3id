@@ -4,6 +4,7 @@ describe('INFRA-01: Multi-tenant schema', () => {
   const TENANT_TABLES = [
     'tenants', 'phone_numbers', 'tenant_users', 'bot_configs',
     'services', 'schedules', 'conversations', 'bookings', 'whatsapp_templates',
+    'staff', 'messages',
   ]
 
   it.each(TENANT_TABLES)('table %s exists in public schema', async (table) => {
@@ -17,7 +18,8 @@ describe('INFRA-01: Multi-tenant schema', () => {
     const TABLES_WITH_TENANT_ID = [
       'phone_numbers', 'tenant_users', 'bot_configs', 'services',
       'schedules', 'conversations', 'bookings', 'whatsapp_templates',
+      'staff', 'messages',
     ]
-    expect(TABLES_WITH_TENANT_ID.length).toBe(8)
+    expect(TABLES_WITH_TENANT_ID.length).toBe(10)
   })
 })

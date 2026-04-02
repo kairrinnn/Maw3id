@@ -4,6 +4,7 @@ describe('INFRA-02: RLS default DENY', () => {
   const RLS_TABLES = [
     'services', 'schedules', 'conversations', 'bookings',
     'bot_configs', 'phone_numbers', 'tenant_users', 'whatsapp_templates',
+    'staff', 'messages',
   ]
 
   it.each(RLS_TABLES)('table %s has RLS enabled', async (table) => {

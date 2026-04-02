@@ -52,7 +52,7 @@ describe('sendTextMessage', () => {
     })
     const { sendTextMessage } = await import('@/lib/whatsapp/send')
     await sendTextMessage('212600111111', 'Hi', 'PID')
-    expect(mockFetch.mock.calls[0][0]).toContain('/v19.0/')
+    expect(mockFetch.mock.calls[0][0]).toContain('/v21.0/')
   })
 })
 
