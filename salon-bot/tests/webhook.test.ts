@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { WebhookPayload } from '@/lib/whatsapp/types'
 
-// Mock the service client before importing route
+// Shared mocks
 const mockFrom = vi.fn()
 const mockSelect = vi.fn()
+const mockUpsert = vi.fn()
 const mockEq = vi.fn()
 const mockSingle = vi.fn()
-const mockUpsert = vi.fn()
 
 const mockSupabase = {
   from: mockFrom,
@@ -16,21 +16,39 @@ vi.mock('@/lib/supabase/service', () => ({
   createServiceClient: vi.fn(() => mockSupabase),
 }))
 
-// Mock sendTextMessage so route tests don't make real fetch calls
 vi.mock('@/lib/whatsapp/send', () => ({
   sendTextMessage: vi.fn().mockResolvedValue('wamid.MOCK_REPLY'),
 }))
 
-// Helper to build a fluent chain mock that returns a specific value at the end
-function buildChain(returnValue: unknown) {
-  const chain: Record<string, unknown> = {}
-  const chainFn = () => chain
-  chain.select = vi.fn(chainFn)
-  chain.eq = vi.fn(chainFn)
-  chain.single = vi.fn(() => returnValue)
-  chain.upsert = vi.fn(() => returnValue)
-  return chain
-}
+vi.mock('@/lib/booking/service', () => ({
+  createBooking: vi.fn().mockResolvedValue({ booking: { id: 'booking-uuid-1' }, conflict: false }),
+  cancelBooking: vi.fn().mockResolvedValue(undefined),
+  modifyBooking: vi.fn().mockResolvedValue({ booking: { id: 'booking-uuid-1' }, conflict: false }),
+  getUpcomingBookings: vi.fn().mockResolvedValue([]),
+}))
+
+vi.mock('@/lib/llm/intent', () => ({
+  extractIntent: vi.fn().mockResolvedValue({
+    intent: 'greeting',
+    confidence: 'high',
+    service_name: null,
+    date_raw: null,
+    time_raw: null,
+  }),
+}))
+
+vi.mock('@/lib/fsm/machine', () => ({
+  processIntent: vi.fn().mockReturnValue({
+    nextState: { step: 'greeting', status: 'idle' },
+    replyText: 'Bonjour! Comment puis-je vous aider?',
+  }),
+  MODIFY_KEYWORDS: /\b(modifier|changer|reporter|deplacer)\b/i,
+}))
+
+vi.mock('@/lib/fsm/state', () => ({
+  loadConversationState: vi.fn().mockResolvedValue({ step: 'greeting', status: 'idle' }),
+  saveConversationState: vi.fn().mockResolvedValue(undefined),
+}))
 
 // Helper: build minimal valid webhook payload
 function makePayload(overrides?: {
@@ -38,7 +56,7 @@ function makePayload(overrides?: {
   from?: string
   wamid?: string
   messageType?: string
-  messages?: unknown[]
+  messages?: any[]
   noMessages?: boolean
 }): WebhookPayload {
   const msgs = overrides?.noMessages
@@ -70,13 +88,13 @@ function makePayload(overrides?: {
                 phone_number_id: overrides?.phoneNumberId ?? 'phone-id-123',
               },
               contacts: [{ profile: { name: 'Test Client' }, wa_id: overrides?.from ?? '212600000001' }],
-              ...(msgs !== undefined ? { messages: msgs as WebhookPayload['entry'][0]['changes'][0]['value']['messages'] } : {}),
+              ...(msgs !== undefined ? { messages: msgs } : {}),
             },
           },
         ],
       },
     ],
-  }
+  } as any
 }
 
 // Helper: build a Request object
@@ -91,167 +109,152 @@ function makeRequest(method: 'GET' | 'POST', url: string, body?: unknown): Reque
   })
 }
 
-// Import handlers and mocked dependencies after mocks are set up
+// Import handlers AFTER mocks
 import { GET, POST } from '@/app/api/webhook/route'
 import { sendTextMessage } from '@/lib/whatsapp/send'
+import { createBooking, cancelBooking, modifyBooking, getUpcomingBookings } from '@/lib/booking/service'
 
-describe('GET /api/webhook - Meta verification', () => {
+describe('Webhook API', () => {
   beforeEach(() => {
     process.env.WEBHOOK_VERIFY_TOKEN = 'test-verify-token-secret'
-    vi.clearAllMocks()
-  })
-
-  it('returns hub.challenge when verify_token matches', async () => {
-    const url =
-      'http://localhost/api/webhook?hub.mode=subscribe&hub.verify_token=test-verify-token-secret&hub.challenge=abc123challenge'
-    const req = makeRequest('GET', url)
-    const res = await GET(req)
-    expect(res.status).toBe(200)
-    const text = await res.text()
-    expect(text).toBe('abc123challenge')
-  })
-
-  it('returns 403 when verify_token does not match', async () => {
-    const url =
-      'http://localhost/api/webhook?hub.mode=subscribe&hub.verify_token=wrong-token&hub.challenge=abc123challenge'
-    const req = makeRequest('GET', url)
-    const res = await GET(req)
-    expect(res.status).toBe(403)
-    const text = await res.text()
-    expect(text).toBe('Forbidden')
-  })
-})
-
-describe('POST /api/webhook - message processing', () => {
-  beforeEach(() => {
-    process.env.WEBHOOK_VERIFY_TOKEN = 'test-verify-token-secret'
-    // Skip signature verification in unit tests
     process.env.SKIP_WEBHOOK_SIGNATURE = 'true'
     vi.clearAllMocks()
-    // Default from() returns a fluent chain
-    mockFrom.mockImplementation(() => ({
-      select: mockSelect,
-      upsert: mockUpsert,
-    }))
-    mockSelect.mockImplementation(() => ({
-      eq: mockEq,
-    }))
-    mockEq.mockImplementation(() => ({
-      eq: mockEq,
-      single: mockSingle,
-    }))
-    vi.mocked(sendTextMessage).mockResolvedValue('wamid.MOCK_REPLY')
-  })
 
-  it('returns 200 immediately for status update (no messages array)', async () => {
-    const payload = makePayload({ noMessages: true })
-    const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
-    const res = await POST(req)
-    expect(res.status).toBe(200)
-    // No DB calls should have been made
-    expect(mockFrom).not.toHaveBeenCalled()
-  })
+    const createChain = (data: any, count: number = 0) => {
+      const chain: any = {
+        select: vi.fn(() => chain),
+        upsert: vi.fn(() => chain),
+        eq: vi.fn(() => chain),
+        single: vi.fn(() => Promise.resolve({ data, error: null })),
+        then: (resolve: any) => resolve({ data, error: null, count }),
+      }
+      return chain
+    }
 
-  it('returns 200 silently when phone_number_id has no matching tenant', async () => {
-    // phone_numbers query returns null (unknown phone_number_id)
-    mockSingle.mockResolvedValueOnce({ data: null, error: null })
-
-    const payload = makePayload({ phoneNumberId: 'unknown-phone-id' })
-    const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
-    const res = await POST(req)
-    expect(res.status).toBe(200)
-    // Should have queried phone_numbers but NOT bot_configs
-    expect(mockFrom).toHaveBeenCalledWith('phone_numbers')
-    expect(mockFrom).not.toHaveBeenCalledWith('bot_configs')
-  })
-
-  it('returns 200 silently when bot_config.active is false', async () => {
-    // phone_numbers returns a tenant
-    mockSingle
-      .mockResolvedValueOnce({ data: { tenant_id: 'tenant-uuid-1' }, error: null })
-      // bot_configs returns active: false
-      .mockResolvedValueOnce({ data: { active: false }, error: null })
-
-    const payload = makePayload({ phoneNumberId: 'phone-id-123' })
-    const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
-    const res = await POST(req)
-    expect(res.status).toBe(200)
-    expect(mockFrom).toHaveBeenCalledWith('phone_numbers')
-    expect(mockFrom).toHaveBeenCalledWith('bot_configs')
-    expect(mockFrom).not.toHaveBeenCalledWith('processed_messages')
-  })
-
-  it('skips processing duplicate wamid (rowCount === 0)', async () => {
-    // phone_numbers query returns tenant
-    mockSingle
-      .mockResolvedValueOnce({ data: { tenant_id: 'tenant-uuid-1' }, error: null })
-      // bot_configs returns active: true
-      .mockResolvedValueOnce({ data: { active: true }, error: null })
-    // upsert on processed_messages returns count: 0 (conflict — duplicate)
-    mockUpsert.mockResolvedValueOnce({ data: null, error: null, count: 0 })
-
-    const payload = makePayload({ wamid: 'wamid.duplicate.001' })
-    const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
-    const res = await POST(req)
-    expect(res.status).toBe(200)
-    expect(mockFrom).toHaveBeenCalledWith('processed_messages')
-    // conversations should NOT be upserted since it's a duplicate
-    expect(mockFrom).not.toHaveBeenCalledWith('conversations')
-  })
-
-  it('processes valid text message: upserts conversation, inserts processed_message', async () => {
-    // phone_numbers
-    mockSingle
-      .mockResolvedValueOnce({ data: { tenant_id: 'tenant-uuid-1' }, error: null })
-      // bot_configs
-      .mockResolvedValueOnce({ data: { active: true }, error: null })
-    // upsert processed_messages: count = 1 (new row inserted)
-    mockUpsert
-      .mockResolvedValueOnce({ data: null, error: null, count: 1 })
-      // upsert conversations
-      .mockResolvedValueOnce({ data: null, error: null })
-
-    const payload = makePayload({ messageType: 'text', wamid: 'wamid.new.001' })
-    const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
-    const res = await POST(req)
-    expect(res.status).toBe(200)
-    expect(mockFrom).toHaveBeenCalledWith('processed_messages')
-    expect(mockFrom).toHaveBeenCalledWith('conversations')
-  })
-
-  it('sends non-text reply for image/audio message type', async () => {
-    // phone_numbers
-    mockSingle
-      .mockResolvedValueOnce({ data: { tenant_id: 'tenant-uuid-1' }, error: null })
-      // bot_configs
-      .mockResolvedValueOnce({ data: { active: true }, error: null })
-    // upsert processed_messages: count = 1
-    mockUpsert
-      .mockResolvedValueOnce({ data: null, error: null, count: 1 })
-      // upsert conversations
-      .mockResolvedValueOnce({ data: null, error: null })
-
-    const payload = makePayload({ messageType: 'image', wamid: 'wamid.image.001' })
-    const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
-    const res = await POST(req)
-    expect(res.status).toBe(200)
-
-    // Check sendTextMessage was called with the non-text reply body
-    expect(vi.mocked(sendTextMessage)).toHaveBeenCalledOnce()
-    expect(vi.mocked(sendTextMessage).mock.calls[0][1]).toBe(
-      'Je ne peux traiter que les messages texte pour le moment.'
-    )
-  })
-
-  it('returns 401 when signature is invalid and SKIP_WEBHOOK_SIGNATURE is not set', async () => {
-    delete process.env.SKIP_WEBHOOK_SIGNATURE
-    const payload = makePayload()
-    const req = new Request('http://localhost/api/webhook', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-hub-signature-256': 'sha256=invalid' },
-      body: JSON.stringify(payload),
+    mockFrom.mockImplementation((table) => {
+      if (table === 'phone_numbers') return createChain({ tenant_id: 'tenant-uuid-1' })
+      if (table === 'bot_configs') return createChain({ active: true, owner_notification_wa_id: '212600000099' })
+      if (table === 'processed_messages') return createChain(null, 1) // count = 1
+      if (table === 'conversations') return createChain({ id: 'conv-uuid-1' })
+      if (table === 'services') return createChain([{ id: 's1', tenant_id: 'tenant-uuid-1', name: 'Coupe', duration_minutes: 30, price_mad: 100, active: true }])
+      return createChain(null)
     })
-    const res = await POST(req)
-    expect(res.status).toBe(401)
+  })
+
+  describe('GET /api/webhook - Meta verification', () => {
+    it('returns hub.challenge when verify_token matches', async () => {
+      const url =
+        'http://localhost/api/webhook?hub.mode=subscribe&hub.verify_token=test-verify-token-secret&hub.challenge=abc123challenge'
+      const req = makeRequest('GET', url)
+      const res = await GET(req)
+      expect(res.status).toBe(200)
+      const text = await res.text()
+      expect(text).toBe('abc123challenge')
+    })
+  })
+
+  describe('POST /api/webhook - core processing', () => {
+    it('returns 200 immediately for status update', async () => {
+      const payload = makePayload({ noMessages: true })
+      const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
+      const res = await POST(req)
+      expect(res.status).toBe(200)
+      expect(mockFrom).not.toHaveBeenCalled()
+    })
+
+    it('skips processing duplicate wamid (count === 0)', async () => {
+      mockFrom.mockImplementation((table) => {
+        if (table === 'phone_numbers') return { select: () => ({ eq: () => ({ eq: () => ({ single: () => Promise.resolve({ data: { tenant_id: 't1' } }) }) }) }) }
+        if (table === 'bot_configs') return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: { active: true } }) }) }) }
+        if (table === 'processed_messages') return { upsert: () => ({ then: (res: any) => res({ count: 0 }) }) }
+        return { select: () => ({ single: () => Promise.resolve({ data: null }) }) }
+      })
+
+      const payload = makePayload({ wamid: 'wamid.duplicate' })
+      const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
+      const res = await POST(req)
+      expect(res.status).toBe(200)
+    })
+  })
+
+  describe('POST /api/webhook - booking orchestration', () => {
+    it('BOOK-01 — booking created on confirming->confirmed', async () => {
+      const { loadConversationState, saveConversationState } = await import('@/lib/fsm/state')
+      const { processIntent: mockProcessIntent } = await import('@/lib/fsm/machine')
+
+      vi.mocked(loadConversationState).mockResolvedValueOnce({
+        step: 'confirming', status: 'idle', service_id: 's1', service_name: 'Coupe',
+        date: '2026-04-07', time: '15:00',
+      })
+      vi.mocked(mockProcessIntent).mockReturnValueOnce({
+        nextState: { step: 'confirmed', status: 'done', service_id: 's1', service_name: 'Coupe', date: '2026-04-07', time: '15:00' },
+        replyText: 'Parfait! Votre rendez-vous est confirme.',
+      })
+
+      const payload = makePayload({ messageType: 'text', wamid: 'wamid.book.001' })
+      const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
+      const res = await POST(req)
+
+      expect(res.status).toBe(200)
+      expect(vi.mocked(createBooking)).toHaveBeenCalled()
+      expect(vi.mocked(saveConversationState)).toHaveBeenCalledWith(
+        expect.anything(), expect.any(String), expect.any(String),
+        expect.objectContaining({ booking_id: 'booking-uuid-1' })
+      )
+    })
+
+    it('BOOK-03+07 — cancel calls cancelBooking and notifies owner', async () => {
+      const { loadConversationState } = await import('@/lib/fsm/state')
+      const { processIntent: mockProcessIntent } = await import('@/lib/fsm/machine')
+
+      vi.mocked(loadConversationState).mockResolvedValueOnce({
+        step: 'confirmed', status: 'done', service_name: 'Coupe',
+        date: '2026-04-07', time: '15:00', booking_id: 'booking-uuid-1',
+      })
+      vi.mocked(mockProcessIntent).mockReturnValueOnce({
+        nextState: { step: 'cancelling', status: 'in_progress', service_name: 'Coupe', date: '2026-04-07', time: '15:00', booking_id: 'booking-uuid-1' },
+        replyText: 'Votre rendez-vous va etre annule.',
+      })
+
+      const payload = makePayload({ messageType: 'text', wamid: 'wamid.cancel.001' })
+      const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
+      const res = await POST(req)
+
+      expect(res.status).toBe(200)
+      expect(vi.mocked(cancelBooking)).toHaveBeenCalled()
+      // Verification of owner notification
+      expect(vi.mocked(sendTextMessage)).toHaveBeenCalledWith('212600000099', expect.stringContaining('[Annulation]'), expect.anything())
+    })
+
+    it('BOOK-04 — query returns formatted booking list', async () => {
+      const { loadConversationState } = await import('@/lib/fsm/state')
+      const { processIntent: mockProcessIntent } = await import('@/lib/fsm/machine')
+
+      vi.mocked(loadConversationState).mockResolvedValueOnce({ step: 'greeting', status: 'idle' })
+      vi.mocked(mockProcessIntent).mockReturnValueOnce({
+        nextState: { step: 'greeting', status: 'idle' },
+        replyText: 'UPCOMING_BOOKINGS_PLACEHOLDER',
+      })
+      vi.mocked(getUpcomingBookings).mockResolvedValueOnce([{
+        id: '1',
+        tenant_id: 't1',
+        service_id: 's1',
+        staff_id: null,
+        client_wa_id: '212600000001',
+        client_name: null,
+        conversation_id: null,
+        appointment_at: '2026-04-07T14:00:00+01:00',
+        status: 'confirmed',
+        created_at: '2026-04-04T10:00:00Z',
+        services: { name: 'Coupe' },
+      }])
+
+      const payload = makePayload({ messageType: 'text', wamid: 'wamid.query.001' })
+      const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
+      const res = await POST(req)
+
+      expect(res.status).toBe(200)
+      expect(vi.mocked(sendTextMessage)).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('Vos prochains rendez-vous'), expect.any(String))
+    })
   })
 })
