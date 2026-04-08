@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Webhook Pipeline** - Rule-based FSM webhook handler with tenant routing and Meta API send (completed 2026-04-01)
 - [x] **Phase 3: LLM Intent Engine** - Natural language extraction layer on top of working FSM (completed 2026-04-06)
 - [x] **Phase 4: Booking Core** - Full booking CRUD with conflict prevention, modify, cancel, and notifications (completed 2026-04-07)
-- [ ] **Phase 4.5: LLM Responses** - Gemini generates all bot reply text instead of hardcoded FSM strings — 04.5-01 complete (INSERTED)
+- [x] **Phase 4.5: LLM Responses** - Gemini generates all bot reply text instead of hardcoded FSM strings — 04.5-01 complete (INSERTED) (completed 2026-04-08)
 - [ ] **Phase 5: Templates & Reminders** - Meta-approved template management and 24h reminder scheduler
 - [ ] **Phase 6: Dashboard Admin** - Service/hours CRUD, bookings list, and revenue stats per salon
 - [ ] **Phase 7: Onboarding Flow** - Guided setup, WhatsApp number connection, and test mode before go-live
@@ -88,7 +88,7 @@ Plans:
   2. The FSM still controls state transitions — Gemini only generates the reply text
   3. If Gemini fails, a graceful fallback reply is sent (not silence)
   4. Response latency stays under 4s for 95% of messages
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 04.5-01-PLAN.md — Reply module: ReplyContext type, generateReply(), fallback map, Gemini plain-text call with 3s timeout (completed 2026-04-08)
 - [ ] 04.5-02-PLAN.md — Wire generateReply() into webhook route, tenant name JOIN, conflict path, updated webhook tests
@@ -145,7 +145,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.5 -> 5 -> 6 -> 7 -> 8
 | 2. Webhook Pipeline | 2/2 | Complete   | 2026-04-01 |
 | 3. LLM Intent Engine | 3/3 | Complete | 2026-04-06 |
 | 4. Booking Core | 1/1 | Complete | 2026-04-07 |
-| 4.5. LLM Responses | 1/2 | In Progress | - |
+| 4.5. LLM Responses | 2/2 | Complete   | 2026-04-08 |
 | 5. Templates & Reminders | 0/? | Not started | - |
 | 6. Dashboard Admin | 0/? | Not started | - |
 | 7. Onboarding Flow | 0/? | Not started | - |
