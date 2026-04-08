@@ -7,6 +7,8 @@ import { processIntent } from '@/lib/fsm/machine'
 import { loadConversationState, saveConversationState } from '@/lib/fsm/state'
 import { createBooking, cancelBooking, modifyBooking, getUpcomingBookings } from '@/lib/booking/service'
 import type { Service } from '@/lib/llm/types'
+import { generateReply } from '@/lib/llm/reply'
+import type { ReplyContext } from '@/lib/llm/types'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -70,8 +72,16 @@ export async function POST(request: Request) {
     return new Response('OK', { status: 200 })
   }
 
+  const { data: tenantRow } = await supabase
+    .from('tenants')
+    .select('name')
+    .eq('id', tenant_id)
+    .single()
+
+  const salonName = tenantRow?.name ?? 'le salon'
+
   for (const message of value.messages) {
-    await processMessage(supabase, tenant_id, message, phoneNumberId, botConfig)
+    await processMessage(supabase, tenant_id, message, phoneNumberId, botConfig, salonName)
   }
 
   return new Response('OK', { status: 200 })
@@ -82,7 +92,8 @@ async function processMessage(
   tenantId: string,
   message: WebhookMessage,
   phoneNumberId: string,
-  botConfig: { active: boolean; owner_notification_wa_id: string | null }
+  botConfig: { active: boolean; owner_notification_wa_id: string | null },
+  salonName: string
 ) {
   // Timezone: Morocco (UTC+1, no DST). All appointment_at use +01:00 offset.
   const wamid = message.id
@@ -146,11 +157,16 @@ async function processMessage(
       })
 
       if (result.conflict) {
-        await sendTextMessage(
-          clientWaId,
-          'Desole, ce creneau est deja pris. Voulez-vous choisir une autre heure?',
-          phoneNumberId
-        )
+        const conflictReply = await generateReply({
+          currentStep: state.step,
+          nextStep: 'awaiting_datetime',
+          intent: intent.intent,
+          userMessage: userText,
+          serviceName: state.service_name ?? undefined,
+          salonName,
+          conflict: true,
+        })
+        await sendTextMessage(clientWaId, conflictReply, phoneNumberId)
         await saveConversationState(supabase, tenantId, clientWaId, {
           ...state,
           step: 'awaiting_datetime',
@@ -160,7 +176,17 @@ async function processMessage(
 
       const stateWithBooking = { ...nextState, booking_id: result.booking!.id }
       await saveConversationState(supabase, tenantId, clientWaId, stateWithBooking)
-      await sendTextMessage(clientWaId, replyText, phoneNumberId)
+      const geminiReplyA = await generateReply({
+        currentStep: state.step,
+        nextStep: nextState.step,
+        intent: intent.intent,
+        userMessage: userText,
+        serviceName: nextState.service_name ?? undefined,
+        date: nextState.date ?? undefined,
+        time: nextState.time ?? undefined,
+        salonName,
+      })
+      await sendTextMessage(clientWaId, geminiReplyA, phoneNumberId)
       return
     }
 
@@ -170,11 +196,16 @@ async function processMessage(
       const result = await modifyBooking(supabase, tenantId, state.booking_id!, newAppointmentAt)
 
       if (result.conflict) {
-        await sendTextMessage(
-          clientWaId,
-          'Desole, ce nouveau creneau est deja pris. Voulez-vous choisir une autre heure?',
-          phoneNumberId
-        )
+        const conflictReply = await generateReply({
+          currentStep: state.step,
+          nextStep: 'modify_awaiting_datetime',
+          intent: intent.intent,
+          userMessage: userText,
+          serviceName: state.service_name ?? undefined,
+          salonName,
+          conflict: true,
+        })
+        await sendTextMessage(clientWaId, conflictReply, phoneNumberId)
         await saveConversationState(supabase, tenantId, clientWaId, {
           ...state,
           step: 'modify_awaiting_datetime',
@@ -185,7 +216,17 @@ async function processMessage(
       }
 
       await saveConversationState(supabase, tenantId, clientWaId, nextState)
-      await sendTextMessage(clientWaId, replyText, phoneNumberId)
+      const geminiReplyB = await generateReply({
+        currentStep: state.step,
+        nextStep: nextState.step,
+        intent: intent.intent,
+        userMessage: userText,
+        serviceName: nextState.service_name ?? undefined,
+        date: nextState.date ?? undefined,
+        time: nextState.time ?? undefined,
+        salonName,
+      })
+      await sendTextMessage(clientWaId, geminiReplyB, phoneNumberId)
       return
     }
 
@@ -196,7 +237,15 @@ async function processMessage(
         ...nextState,
         step: 'confirmed',
       })
-      await sendTextMessage(clientWaId, replyText, phoneNumberId)
+      const geminiReplyC = await generateReply({
+        currentStep: state.step,
+        nextStep: 'confirmed_modify_abandoned',
+        intent: intent.intent,
+        userMessage: userText,
+        serviceName: nextState.service_name ?? undefined,
+        salonName,
+      })
+      await sendTextMessage(clientWaId, geminiReplyC, phoneNumberId)
       return
     }
 
@@ -208,7 +257,17 @@ async function processMessage(
         step: 'cancelled',
         status: 'failed',
       })
-      await sendTextMessage(clientWaId, replyText, phoneNumberId)
+      const geminiReplyD = await generateReply({
+        currentStep: state.step,
+        nextStep: nextState.step,
+        intent: intent.intent,
+        userMessage: userText,
+        serviceName: state.service_name ?? undefined,
+        date: state.date ?? undefined,
+        time: state.time ?? undefined,
+        salonName,
+      })
+      await sendTextMessage(clientWaId, geminiReplyD, phoneNumberId)
 
       // Owner notification — fire and forget, must NOT break client flow
       if (botConfig.owner_notification_wa_id) {
@@ -259,8 +318,18 @@ async function processMessage(
     }
 
     // --- DEFAULT: standard FSM flow (no booking action needed) ---
+    const geminiReplyF = await generateReply({
+      currentStep: state.step,
+      nextStep: nextState.step,
+      intent: intent.intent,
+      userMessage: userText,
+      serviceName: nextState.service_name ?? state.service_name ?? undefined,
+      date: nextState.date ?? state.date ?? undefined,
+      time: nextState.time ?? state.time ?? undefined,
+      salonName,
+    })
     await saveConversationState(supabase, tenantId, clientWaId, nextState)
-    await sendTextMessage(clientWaId, replyText, phoneNumberId)
+    await sendTextMessage(clientWaId, geminiReplyF, phoneNumberId)
   } catch (err) {
     console.error('[webhook] processMessage error:', err)
     await sendTextMessage(clientWaId, "Desole, une erreur s'est produite. Veuillez reessayer.", phoneNumberId)
