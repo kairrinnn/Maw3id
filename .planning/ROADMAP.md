@@ -14,9 +14,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Multi-tenant schema, RLS isolation, Supabase Auth, and per-tenant bot config (completed 2026-03-31)
 - [x] **Phase 2: Webhook Pipeline** - Rule-based FSM webhook handler with tenant routing and Meta API send (completed 2026-04-01)
-- [ ] **Phase 3: LLM Intent Engine** - Natural language extraction layer on top of working FSM
-- [ ] **Phase 4: Booking Core** - Full booking CRUD with conflict prevention, modify, cancel, and notifications
-- [ ] **Phase 4.5: LLM Responses** - Gemini generates all bot reply text instead of hardcoded FSM strings (INSERTED)
+- [x] **Phase 3: LLM Intent Engine** - Natural language extraction layer on top of working FSM (completed 2026-04-06)
+- [x] **Phase 4: Booking Core** - Full booking CRUD with conflict prevention, modify, cancel, and notifications (completed 2026-04-07)
+- [ ] **Phase 4.5: LLM Responses** - Gemini generates all bot reply text instead of hardcoded FSM strings — 04.5-01 complete (INSERTED)
 - [ ] **Phase 5: Templates & Reminders** - Meta-approved template management and 24h reminder scheduler
 - [ ] **Phase 6: Dashboard Admin** - Service/hours CRUD, bookings list, and revenue stats per salon
 - [ ] **Phase 7: Onboarding Flow** - Guided setup, WhatsApp number connection, and test mode before go-live
@@ -90,7 +90,7 @@ Plans:
   4. Response latency stays under 4s for 95% of messages
 **Plans:** 2 plans
 Plans:
-- [ ] 04.5-01-PLAN.md — Reply module: ReplyContext type, generateReply(), fallback map, Gemini plain-text call with 3s timeout
+- [x] 04.5-01-PLAN.md — Reply module: ReplyContext type, generateReply(), fallback map, Gemini plain-text call with 3s timeout (completed 2026-04-08)
 - [ ] 04.5-02-PLAN.md — Wire generateReply() into webhook route, tenant name JOIN, conflict path, updated webhook tests
 
 ### Phase 5: Templates & Reminders
@@ -143,9 +143,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.5 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-31 |
 | 2. Webhook Pipeline | 2/2 | Complete   | 2026-04-01 |
-| 3. LLM Intent Engine | 0/3 | Planned | - |
-| 4. Booking Core | 0/? | Not started | - |
-| 4.5. LLM Responses | 0/2 | Planned | - |
+| 3. LLM Intent Engine | 3/3 | Complete | 2026-04-06 |
+| 4. Booking Core | 1/1 | Complete | 2026-04-07 |
+| 4.5. LLM Responses | 1/2 | In Progress | - |
 | 5. Templates & Reminders | 0/? | Not started | - |
 | 6. Dashboard Admin | 0/? | Not started | - |
 | 7. Onboarding Flow | 0/? | Not started | - |

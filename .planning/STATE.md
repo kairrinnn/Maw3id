@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 02-02-PLAN.md — sendTextMessage helper, verifyWebhookSignature, route.ts updated. Phase 2 complete.
-last_updated: "2026-04-01T07:17:00Z"
-last_activity: 2026-04-01 — Completed 02-02 (send.ts, verify.ts, route.ts signature gate, 46 tests passing)
+stopped_at: Completed 04.5-01-PLAN.md — reply.ts module + ReplyContext interface + 15 tests (100 total passing)
+last_updated: "2026-04-08T21:59:09Z"
+last_activity: 2026-04-08 — Completed 04.5-01 (reply.ts, types.ts ReplyContext, llm-reply.test.ts, 100 tests passing)
 progress:
   total_phases: 8
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
-  percent: 31
+  completed_phases: 4
+  total_plans: 9
+  completed_plans: 6
+  percent: 56
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-30)
 
 **Core value:** Un client peut réserver un créneau au salon à n'importe quelle heure, et le salon ne rate plus aucun rendez-vous faute de réponse manuelle.
-**Current focus:** Phase 2 — Webhook Pipeline
+**Current focus:** Phase 4.5 — LLM Response Layer
 
 ## Current Position
 
-Phase: 2 of 8 (Webhook Pipeline) — COMPLETE
-Plan: 2 of 2 in Phase 2 (both complete)
-Status: Phase 2 complete — ready for Phase 3 (FSM + conversation state machine)
-Last activity: 2026-04-01 — Completed 02-02 (send.ts, verify.ts, route.ts signature gate, 46 tests passing)
+Phase: 4.5 of 8 (LLM Responses) — IN PROGRESS
+Plan: 1 of 2 in Phase 4.5 (04.5-01 complete, 04.5-02 pending)
+Status: 04.5-01 complete — ready for 04.5-02 (wire generateReply into route.ts)
+Last activity: 2026-04-08 — Completed 04.5-01 (reply.ts, ReplyContext, 15 new tests, 100 total passing)
 
-Progress: [███░░░░░░░] 31% (4 of ~16 plans complete across all phases)
+Progress: [█████░░░░░] 56% (6 of ~11 plans complete across all phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 8.5 min
-- Total execution time: 0.57 hours
+- Total plans completed: 6
+- Average duration: 8.2 min
+- Total execution time: ~49 min
 
 **By Phase:**
 
@@ -45,10 +45,13 @@ Progress: [███░░░░░░░] 31% (4 of ~16 plans complete across a
 |-------|-------|-------|----------|
 | 01-foundation | 2 | 23 min | 11.5 min |
 | 02-webhook-pipeline | 2 | 7 min | 3.5 min |
+| 03-llm-intent | 2 | ~12 min | 6 min |
+| 04-booking-core | 1 | ~7 min | 7 min |
+| 04.5-llm-responses | 1 (of 2) | 7 min | 7 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (8 min), 01-02 (15 min), 02-01 (3 min), 02-02 (4 min)
-- Trend: webhook plan was tight-scoped, fast execution
+- Last 5 plans: 03-01 (~6min), 03-02 (~6min), 04-01 (~7min), 04.5-01 (7min)
+- Trend: consistent ~7min per plan on implementation phases
 
 *Updated after each plan completion*
 
@@ -76,10 +79,14 @@ Recent decisions affecting current work:
 - [02-02]: sendTextMessage throws on non-200 (not silent skip) — caller decides whether to swallow errors
 - [02-02]: SKIP_WEBHOOK_SIGNATURE env var bypasses signature check in dev/test; must never be set in prod
 - [02-02]: webhook.test.ts mocks sendTextMessage entirely (not fetch) — route tests stay focused on routing/DB logic
+- [04.5-01]: reply.ts uses plain text Gemini (no JSON schema) — reply generation is freeform prose, not structured data
+- [04.5-01]: callGeminiForReply is NOT exported — tests mock @google/genai at module level
+- [04.5-01]: FALLBACK_REPLIES keyed by string (not enum) — allows 'conflict' and 'default' as extra keys beyond FSM_STEPS
+- [04.5-01]: vi.fn() constructor mock uses regular function (not arrow) for new-able classes
 
 ### Pending Todos
 
-None yet.
+- Execute 04.5-02: wire generateReply() into route.ts, replacing hardcoded replyText from processIntent()
 
 ### Blockers/Concerns
 
@@ -89,6 +96,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T07:17:00Z
-Stopped at: Completed 02-02-PLAN.md — sendTextMessage helper, verifyWebhookSignature, route.ts signature gate. Phase 2 complete.
+Last session: 2026-04-08T21:59:09Z
+Stopped at: Completed 04.5-01-PLAN.md — reply.ts module + ReplyContext interface + 15 tests. Ready for 04.5-02.
 Resume file: None
