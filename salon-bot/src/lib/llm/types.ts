@@ -39,3 +39,16 @@ export interface Service {
 }
 
 export const INITIAL_STATE: ConversationState = { step: 'greeting', status: 'idle' }
+
+export interface ReplyContext {
+  currentStep: string     // FSM step BEFORE transition
+  nextStep: string        // FSM step AFTER transition
+  intent: string          // 'book' | 'cancel' | 'modify' | 'query' | 'greeting' | 'unknown'
+  userMessage: string     // what the client sent
+  serviceName?: string | null
+  date?: string | null    // ISO date e.g. "2026-04-09"
+  time?: string | null    // "15:00"
+  clientName?: string | null
+  salonName: string       // from tenants.name JOIN in route.ts
+  conflict?: boolean      // true when slot conflict detected
+}
