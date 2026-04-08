@@ -50,6 +50,10 @@ vi.mock('@/lib/fsm/state', () => ({
   saveConversationState: vi.fn().mockResolvedValue(undefined),
 }))
 
+vi.mock('@/lib/llm/reply', () => ({
+  generateReply: vi.fn().mockResolvedValue('Mocked Gemini reply'),
+}))
+
 // Helper: build minimal valid webhook payload
 function makePayload(overrides?: {
   phoneNumberId?: string
@@ -113,6 +117,8 @@ function makeRequest(method: 'GET' | 'POST', url: string, body?: unknown): Reque
 import { GET, POST } from '@/app/api/webhook/route'
 import { sendTextMessage } from '@/lib/whatsapp/send'
 import { createBooking, cancelBooking, modifyBooking, getUpcomingBookings } from '@/lib/booking/service'
+import { generateReply } from '@/lib/llm/reply'
+import { loadConversationState } from '@/lib/fsm/state'
 
 describe('Webhook API', () => {
   beforeEach(() => {
@@ -134,6 +140,7 @@ describe('Webhook API', () => {
     mockFrom.mockImplementation((table) => {
       if (table === 'phone_numbers') return createChain({ tenant_id: 'tenant-uuid-1' })
       if (table === 'bot_configs') return createChain({ active: true, owner_notification_wa_id: '212600000099' })
+      if (table === 'tenants') return createChain({ name: 'Salon Test Casablanca' })
       if (table === 'processed_messages') return createChain(null, 1) // count = 1
       if (table === 'conversations') return createChain({ id: 'conv-uuid-1' })
       if (table === 'services') return createChain([{ id: 's1', tenant_id: 'tenant-uuid-1', name: 'Coupe', duration_minutes: 30, price_mad: 100, active: true }])
@@ -166,8 +173,9 @@ describe('Webhook API', () => {
       mockFrom.mockImplementation((table) => {
         if (table === 'phone_numbers') return { select: () => ({ eq: () => ({ eq: () => ({ single: () => Promise.resolve({ data: { tenant_id: 't1' } }) }) }) }) }
         if (table === 'bot_configs') return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: { active: true } }) }) }) }
+        if (table === 'tenants') return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: { name: 'Salon Test' } }) }) }) }
         if (table === 'processed_messages') return { upsert: () => ({ then: (res: any) => res({ count: 0 }) }) }
-        return { select: () => ({ single: () => Promise.resolve({ data: null }) }) }
+        return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: null }) }) }) }
       })
 
       const payload = makePayload({ wamid: 'wamid.duplicate' })
@@ -227,7 +235,6 @@ describe('Webhook API', () => {
     })
 
     it('BOOK-04 — query returns formatted booking list', async () => {
-      const { loadConversationState } = await import('@/lib/fsm/state')
       const { processIntent: mockProcessIntent } = await import('@/lib/fsm/machine')
 
       vi.mocked(loadConversationState).mockResolvedValueOnce({ step: 'greeting', status: 'idle' })
@@ -255,6 +262,82 @@ describe('Webhook API', () => {
 
       expect(res.status).toBe(200)
       expect(vi.mocked(sendTextMessage)).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('Vos prochains rendez-vous'), expect.any(String))
+    })
+  })
+
+  describe('POST /api/webhook - generateReply wiring', () => {
+    it('calls generateReply with correct context for default FSM path', async () => {
+      const { processIntent: mockProcessIntent } = await import('@/lib/fsm/machine')
+
+      vi.mocked(loadConversationState).mockResolvedValueOnce({ step: 'greeting', status: 'idle' })
+      vi.mocked(mockProcessIntent).mockReturnValueOnce({
+        nextState: { step: 'greeting', status: 'idle' },
+        replyText: 'Bonjour! Comment puis-je vous aider?',
+      })
+
+      const payload = makePayload()
+      const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
+      await POST(req)
+
+      expect(vi.mocked(generateReply)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          currentStep: 'greeting',
+          nextStep: 'greeting',
+          intent: 'greeting',
+          userMessage: 'Bonjour',
+          salonName: 'Salon Test Casablanca',
+        })
+      )
+    })
+
+    it('UPCOMING_BOOKINGS_PLACEHOLDER path does NOT call generateReply', async () => {
+      const { processIntent: mockProcessIntent } = await import('@/lib/fsm/machine')
+
+      vi.mocked(loadConversationState).mockResolvedValueOnce({ step: 'greeting', status: 'idle' })
+      vi.mocked(mockProcessIntent).mockReturnValueOnce({
+        nextState: { step: 'greeting', status: 'idle' },
+        replyText: 'UPCOMING_BOOKINGS_PLACEHOLDER',
+      })
+
+      const payload = makePayload()
+      const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
+      await POST(req)
+
+      expect(vi.mocked(generateReply)).not.toHaveBeenCalled()
+    })
+
+    it('booking conflict calls generateReply with conflict=true', async () => {
+      const { processIntent: mockProcessIntent } = await import('@/lib/fsm/machine')
+
+      vi.mocked(loadConversationState).mockResolvedValueOnce({
+        step: 'confirming', status: 'in_progress',
+        service_id: 's1', service_name: 'Coupe', date: '2026-04-10', time: '15:00',
+      })
+      vi.mocked(mockProcessIntent).mockReturnValueOnce({
+        nextState: { step: 'confirmed', status: 'done', service_id: 's1', service_name: 'Coupe', date: '2026-04-10', time: '15:00' },
+        replyText: 'Parfait!',
+      })
+      vi.mocked(createBooking).mockResolvedValueOnce({ booking: null, conflict: true })
+
+      const payload = makePayload({ wamid: 'wamid.conflict.001' })
+      const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
+      await POST(req)
+
+      expect(vi.mocked(generateReply)).toHaveBeenCalledWith(
+        expect.objectContaining({ conflict: true })
+      )
+    })
+
+    it('default FSM path sends Mocked Gemini reply via sendTextMessage', async () => {
+      const payload = makePayload()
+      const req = makeRequest('POST', 'http://localhost/api/webhook', payload)
+      await POST(req)
+
+      expect(vi.mocked(sendTextMessage)).toHaveBeenCalledWith(
+        '212600000001',
+        'Mocked Gemini reply',
+        'phone-id-123'
+      )
     })
   })
 })
