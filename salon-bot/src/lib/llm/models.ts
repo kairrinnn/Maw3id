@@ -7,7 +7,7 @@ export async function tryGemini(message: string, systemPrompt: string): Promise<
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
     const result = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       contents: [{ role: 'user', parts: [{ text: message }] }],
       config: {
         systemInstruction: systemPrompt,

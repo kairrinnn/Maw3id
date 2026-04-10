@@ -8,7 +8,10 @@ import { loadConversationState, saveConversationState } from '@/lib/fsm/state'
 import { createBooking, cancelBooking, modifyBooking, getUpcomingBookings } from '@/lib/booking/service'
 import type { Service } from '@/lib/llm/types'
 import { generateReply } from '@/lib/llm/reply'
-import type { ReplyContext } from '@/lib/llm/types'
+
+function detectLang(text: string): 'fr' | 'ar' {
+  return /[\u0600-\u06FF]/.test(text) ? 'ar' : 'fr'
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -133,6 +136,7 @@ async function processMessage(
   }
 
   const userText = message.text.body
+  const lang = detectLang(userText)
   try {
     const { data: services } = await supabase
       .from('services')
@@ -141,6 +145,7 @@ async function processMessage(
       .eq('active', true)
 
     const activeServices: Service[] = (services as Service[]) ?? []
+    const serviceNames = activeServices.map(s => s.name)
     const state = await loadConversationState(supabase, tenantId, clientWaId)
     const intent = await extractIntent(userText, state, activeServices)
     const { nextState, replyText } = processIntent(state, intent, activeServices, userText)
@@ -165,6 +170,8 @@ async function processMessage(
           serviceName: state.service_name ?? undefined,
           salonName,
           conflict: true,
+          services: serviceNames,
+          lang,
         })
         await sendTextMessage(clientWaId, conflictReply, phoneNumberId)
         await saveConversationState(supabase, tenantId, clientWaId, {
@@ -185,6 +192,8 @@ async function processMessage(
         date: nextState.date ?? undefined,
         time: nextState.time ?? undefined,
         salonName,
+        services: serviceNames,
+        lang,
       })
       await sendTextMessage(clientWaId, geminiReplyA, phoneNumberId)
       return
@@ -204,6 +213,8 @@ async function processMessage(
           serviceName: state.service_name ?? undefined,
           salonName,
           conflict: true,
+          services: serviceNames,
+          lang,
         })
         await sendTextMessage(clientWaId, conflictReply, phoneNumberId)
         await saveConversationState(supabase, tenantId, clientWaId, {
@@ -225,6 +236,8 @@ async function processMessage(
         date: nextState.date ?? undefined,
         time: nextState.time ?? undefined,
         salonName,
+        services: serviceNames,
+        lang,
       })
       await sendTextMessage(clientWaId, geminiReplyB, phoneNumberId)
       return
@@ -244,6 +257,8 @@ async function processMessage(
         userMessage: userText,
         serviceName: nextState.service_name ?? undefined,
         salonName,
+        services: serviceNames,
+        lang,
       })
       await sendTextMessage(clientWaId, geminiReplyC, phoneNumberId)
       return
@@ -266,6 +281,8 @@ async function processMessage(
         date: state.date ?? undefined,
         time: state.time ?? undefined,
         salonName,
+        services: serviceNames,
+        lang,
       })
       await sendTextMessage(clientWaId, geminiReplyD, phoneNumberId)
 
@@ -327,6 +344,8 @@ async function processMessage(
       date: nextState.date ?? state.date ?? undefined,
       time: nextState.time ?? state.time ?? undefined,
       salonName,
+      services: serviceNames,
+      lang,
     })
     await saveConversationState(supabase, tenantId, clientWaId, nextState)
     await sendTextMessage(clientWaId, geminiReplyF, phoneNumberId)

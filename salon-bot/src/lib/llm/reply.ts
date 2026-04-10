@@ -1,4 +1,3 @@
-import { GoogleGenAI } from '@google/genai'
 import type { ReplyContext } from './types'
 
 export const REPLY_TIMEOUT_MS = 3000
@@ -18,14 +17,22 @@ export const FALLBACK_REPLIES: Record<string, string> = {
   default: "Je n'ai pas compris. Puis-je vous aider a reserver un rendez-vous?",
 }
 
-export function buildReplySystemPrompt(salonName: string): string {
-  return `Tu es l'assistante virtuelle de ${salonName}, un salon de beaute marocain.
-Tu reponds en francais avec une touche chaleureuse marocaine.
-Tu peux ajouter une expression darija (inshallah, mabrook, wakha) au maximum une fois par message, et seulement si c'est naturel.
-Tes reponses sont courtes (1-3 phrases maximum), chaleureuses, et directes.
-Tu ne dois jamais mentionner que tu es une IA ou un bot.
-Tu ne dois jamais utiliser de markdown, d'emojis, ou de mise en forme speciale.
-Reponds uniquement en texte brut.`
+export function buildReplySystemPrompt(salonName: string, services: string[] = [], lang: 'fr' | 'ar' = 'fr'): string {
+  const langInstruction = lang === 'ar'
+    ? 'Reponds en arabe marocain (darija). Tu peux melanger avec le francais si c\'est naturel.'
+    : 'Reponds en francais.'
+  const servicesRule = services.length > 0
+    ? `- Services proposes par le salon : ${services.join(', ')}. Ne mentionne AUCUN autre service.\n- Si le client demande un service absent de cette liste, dis que vous ne le proposez pas et cite les services disponibles.`
+    : `- Ne mentionne aucun service specifique.`
+  return `Tu es la receptionniste de ${salonName}. Tu reponds comme une vraie personne, pas comme un chatbot.
+Regles :
+- Maximum 2 phrases. Chaque phrase : 10 mots maximum. Courtes, naturelles.
+- Interdit : "que puis-je vous proposer", "comment puis-je vous aider", "n hesitez pas", et toute formule generique de chatbot.
+- ${langInstruction}
+${servicesRule}
+- Texte brut. Pas d'emojis, pas de markdown.
+- Ne jamais reveler que tu es une IA.
+- Une expression darija (inshallah, mabrook) au maximum, seulement si vraiment naturelle.`
 }
 
 export function buildReplyPrompt(context: ReplyContext): string {
@@ -35,9 +42,19 @@ export function buildReplyPrompt(context: ReplyContext): string {
     prompt = 'Ce creneau est deja pris. Demande-lui de choisir une autre heure avec empathie.'
   } else {
     switch (context.nextStep) {
-      case 'awaiting_service':
-        prompt = 'Le client veut reserver. Demande-lui quel service il souhaite.'
+      case 'awaiting_service': {
+        const list = context.services?.length ? context.services.join(', ') : null
+        if (context.currentStep === 'greeting') {
+          prompt = list
+            ? `Le client vient de saluer. Reponds par un bonjour court et naturel, puis annonce les services (${list}) et demande ce qu'il souhaite.`
+            : `Le client vient de saluer. Reponds par un bonjour court et demande ce qu'il souhaite reserver.`
+        } else {
+          prompt = list
+            ? `Le client veut reserver. Annonce les services disponibles (${list}) et demande lequel il choisit.`
+            : `Le client veut reserver. Demande-lui quel service il souhaite.`
+        }
         break
+      }
       case 'awaiting_datetime':
         prompt = `Le client a choisi ${context.serviceName}. Demande-lui quand il souhaite son rendez-vous (date et heure).`
         break
@@ -63,25 +80,33 @@ export function buildReplyPrompt(context: ReplyContext): string {
         prompt = "Le client a refuse la modification. Son rendez-vous original est maintenu. Rassure-le."
         break
       default:
-        prompt = `Le client a dit: '${context.userMessage}'. Aide-le a reserver un rendez-vous.`
+        prompt = `Le client dit: '${context.userMessage}'. Si c'est hors sujet ou incomprehensible, recentre poliment sur la prise de rendez-vous.`
     }
   }
 
   return `${prompt}\n\nLe client a ecrit: '${context.userMessage}'`
 }
 
-async function callGeminiForReply(context: ReplyContext): Promise<string | undefined> {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: [{ role: 'user', parts: [{ text: buildReplyPrompt(context) }] }],
-    config: {
-      systemInstruction: buildReplySystemPrompt(context.salonName),
-      temperature: 0.7,
-      maxOutputTokens: 120,
+async function callGroqForReply(context: ReplyContext): Promise<string | undefined> {
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.GROQ_API_KEY!}`,
+      'Content-Type': 'application/json',
     },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        { role: 'system', content: buildReplySystemPrompt(context.salonName, context.services ?? [], context.lang ?? 'fr') },
+        { role: 'user', content: buildReplyPrompt(context) },
+      ],
+      temperature: 0.3,
+      max_tokens: 80,
+    }),
   })
-  return response.text
+  if (!response.ok) throw new Error(`Groq error: ${response.status}`)
+  const data = await response.json()
+  return data.choices?.[0]?.message?.content?.trim() ?? undefined
 }
 
 export async function generateReply(context: ReplyContext): Promise<string> {
@@ -92,12 +117,12 @@ export async function generateReply(context: ReplyContext): Promise<string> {
 
   try {
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Gemini reply timeout')), REPLY_TIMEOUT_MS)
+      setTimeout(() => reject(new Error('Groq reply timeout')), REPLY_TIMEOUT_MS)
     )
-    const result = await Promise.race([callGeminiForReply(context), timeoutPromise])
+    const result = await Promise.race([callGroqForReply(context), timeoutPromise])
     return result ?? fallback
   } catch (err) {
-    console.error('[reply] Gemini reply failed, using fallback:', err)
+    console.error('[reply] Groq reply failed, using fallback:', err)
     return fallback
   }
 }

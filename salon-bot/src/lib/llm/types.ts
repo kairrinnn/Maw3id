@@ -51,4 +51,6 @@ export interface ReplyContext {
   clientName?: string | null
   salonName: string       // from tenants.name JOIN in route.ts
   conflict?: boolean      // true when slot conflict detected
+  services?: string[]     // active service names — prevents hallucinations
+  lang?: 'fr' | 'ar'     // detected client language
 }
