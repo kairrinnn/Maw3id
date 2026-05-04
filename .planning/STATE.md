@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 05-01-PLAN.md — sendTemplateMessage implemented, submit route live, 115 tests passing
-last_updated: "2026-05-04T18:10:00Z"
-last_activity: 2026-05-04 — Completed 05-01 (sendTemplateMessage, /api/templates/submit, seed migration, 17 new tests)
+stopped_at: Completed 05-02-PLAN.md — /api/reminders/send with idempotency, pg_cron migration, 124 tests passing
+last_updated: "2026-05-05T00:00:00Z"
+last_activity: 2026-05-05 — Completed 05-02 (reminder send route, pg_cron migration, 10 new tests, Phase 5 complete)
 progress:
   total_phases: 9
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 12
-  completed_plans: 7
-  percent: 64
+  completed_plans: 8
+  percent: 73
 ---
 
 # Project State
@@ -25,19 +25,19 @@ See: .planning/PROJECT.md (updated 2026-03-30)
 
 ## Current Position
 
-Phase: 5 of 8 (Templates & Reminders) — IN PROGRESS
-Plan: 1 of 2 in Phase 5 (05-01 complete, 05-02 pending)
-Status: 05-01 complete — ready for 05-02 (reminder scheduler: pg_cron + /api/reminders/send)
-Last activity: 2026-05-04 — Completed 05-01 (sendTemplateMessage, submit route, seed migration, 115 tests passing)
+Phase: 5 of 8 (Templates & Reminders) — COMPLETE
+Plan: 2 of 2 in Phase 5 — BOTH PLANS DONE
+Status: Phase 5 complete — ready for Phase 6 (Dashboard Admin)
+Last activity: 2026-05-05 — Completed 05-02 (/api/reminders/send, pg_cron migration, 124/125 tests passing)
 
-Progress: [██████░░░░] 64% (7 of ~11 plans complete across all phases)
+Progress: [███████░░░] 73% (8 of ~11 plans complete across all phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 8.2 min
-- Total execution time: ~49 min
+- Total plans completed: 8
+- Average duration: 8.4 min
+- Total execution time: ~67 min
 
 **By Phase:**
 
@@ -48,13 +48,14 @@ Progress: [██████░░░░] 64% (7 of ~11 plans complete across a
 | 03-llm-intent | 2 | ~12 min | 6 min |
 | 04-booking-core | 1 | ~7 min | 7 min |
 | 04.5-llm-responses | 1 (of 2) | 7 min | 7 min |
+| 05-templates-reminders | 2 | ~19 min | 9.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (~6min), 03-02 (~6min), 04-01 (~7min), 04.5-01 (7min)
-- Trend: consistent ~7min per plan on implementation phases
+- Last 5 plans: 03-02 (~6min), 04-01 (~7min), 04.5-01 (7min), 05-01 (4min), 05-02 (~15min)
+- Trend: consistent ~7-15min per plan on implementation phases
 
 *Updated after each plan completion*
-| Phase 04.5-llm-responses P02 | 12 | 2 tasks | 2 files |
+| Phase 05-templates-reminders P02 | 15 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -90,10 +91,15 @@ Recent decisions affecting current work:
 - [05-01]: waba_id used for template submission to /{waba_id}/message_templates (not phone_number_id — different Meta IDs)
 - [05-01]: category locked to UTILITY for all 3 standard templates — appointment reminders are not MARKETING
 - [05-01]: example.body_text is nested array [[val1, val2]] — required by Meta for templates with {{n}} variables
+- [05-02]: Optimistic-lock UPDATE with count:'exact' and .eq('reminder_sent', false) guard — same idempotency pattern as Phase 2 processed_messages
+- [05-02]: Africa/Casablanca timezone hardcoded — Morocco-only product, no multi-timezone requirement
+- [05-02]: pg_cron secrets via current_setting('app.cron_secret') — no literal secrets in migration SQL (git-safe)
+- [05-02]: Test null-coalescing bug: null ?? fixture evaluates to fixture — use 'in' operator to distinguish explicit null from missing key
 
 ### Pending Todos
 
-- Execute 05-02: reminder scheduler — /api/reminders/send route + pg_cron migration
+- Execute Phase 6: Dashboard Admin
+- Phase 7 onboarding setup: ALTER DATABASE postgres SET app.cron_secret and app.app_url before pg_cron migration apply
 
 ### Blockers/Concerns
 
@@ -104,6 +110,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-04T18:10:00Z
-Stopped at: Completed 05-01-PLAN.md — sendTemplateMessage implemented, submit route live, 115 tests passing
+Last session: 2026-05-05T00:00:00Z
+Stopped at: Completed 05-02-PLAN.md — /api/reminders/send with idempotency, pg_cron migration, Phase 5 complete, 124 tests passing
 Resume file: None

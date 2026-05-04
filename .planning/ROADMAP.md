@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: LLM Intent Engine** - Natural language extraction layer on top of working FSM (completed 2026-04-06)
 - [x] **Phase 4: Booking Core** - Full booking CRUD with conflict prevention, modify, cancel, and notifications (completed 2026-04-07)
 - [x] **Phase 4.5: LLM Responses** - Gemini generates all bot reply text instead of hardcoded FSM strings — 04.5-01 complete (INSERTED) (completed 2026-04-08)
-- [ ] **Phase 5: Templates & Reminders** - Meta-approved template management and 24h reminder scheduler
+- [x] **Phase 5: Templates & Reminders** - Meta-approved template management and 24h reminder scheduler (completed 2026-05-05)
 - [ ] **Phase 6: Dashboard Admin** - Service/hours CRUD, bookings list, and revenue stats per salon
 - [ ] **Phase 7: Onboarding Flow** - Guided setup, WhatsApp number connection, and test mode before go-live
 - [ ] **Phase 8: Offres & Facturation** - Subscription records, bot deactivation on expiry, and Stripe billing
@@ -101,10 +101,10 @@ Plans:
   1. The 3 standard templates (reminder, confirmation, cancellation) are stored per tenant and submittable to Meta from the dashboard
   2. A client with a confirmed appointment receives a WhatsApp reminder message 24 hours before their slot via an approved template
   3. A reminder is not sent twice for the same appointment even if the scheduler runs multiple times
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 05-01-PLAN.md — sendTemplateMessage implementation, /api/templates/submit route, seed 3 standard templates per tenant (TPL-01)
-- [ ] 05-02-PLAN.md — /api/reminders/send route with optimistic-lock idempotency, pg_cron 5-min schedule (TPL-02)
+- [x] 05-01-PLAN.md — sendTemplateMessage implementation, /api/templates/submit route, seed 3 standard templates per tenant (TPL-01) (completed 2026-05-04)
+- [x] 05-02-PLAN.md — /api/reminders/send route with optimistic-lock idempotency, pg_cron 5-min schedule (TPL-02) (completed 2026-05-05)
 
 ### Phase 6: Dashboard Admin
 **Goal**: Salon owners can manage their services, hours, and see booking stats without touching a database
@@ -149,7 +149,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.5 -> 5 -> 6 -> 7 -> 8
 | 3. LLM Intent Engine | 3/3 | Complete | 2026-04-06 |
 | 4. Booking Core | 1/1 | Complete | 2026-04-07 |
 | 4.5. LLM Responses | 2/2 | Complete   | 2026-04-08 |
-| 5. Templates & Reminders | 1/2 | In Progress|  |
+| 5. Templates & Reminders | 2/2 | Complete   | 2026-05-05 |
 | 6. Dashboard Admin | 0/? | Not started | - |
 | 7. Onboarding Flow | 0/? | Not started | - |
 | 8. Offres & Facturation | 0/? | Not started | - |

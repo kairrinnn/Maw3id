@@ -39,7 +39,7 @@
 ### Templates & Rappels
 
 - [x] **TPL-01**: 3 templates standard (rappel RDV, confirmation, annulation) soumis à Meta à J1 de l'onboarding
-- [ ] **TPL-02**: Rappel automatique 24h avant RDV envoyé via template Meta approuvé
+- [x] **TPL-02**: Rappel automatique 24h avant RDV envoyé via template Meta approuvé
 
 ### Dashboard Admin
 
@@ -121,7 +121,7 @@
 | BOOK-06 | Phase 4 | Pending |
 | BOOK-07 | Phase 4 | Pending |
 | TPL-01 | Phase 5 | Complete |
-| TPL-02 | Phase 5 | Pending |
+| TPL-02 | Phase 5 | Complete |
 | DASH-01 | Phase 6 | Pending |
 | DASH-02 | Phase 6 | Pending |
 | DASH-03 | Phase 6 | Pending |
