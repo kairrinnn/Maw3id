@@ -1,20 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 // ---------------------------------------------------------------------------
-// Mocks (hoisted — defined before any imports of the route)
+// Mocks (hoisted — vi.mock factories must not reference outer variables)
 // ---------------------------------------------------------------------------
 
-const mockSendTemplateMessage = vi.fn().mockResolvedValue('wamid.OUT.X')
-
 vi.mock('@/lib/whatsapp/send', () => ({
-  sendTemplateMessage: mockSendTemplateMessage,
+  sendTemplateMessage: vi.fn().mockResolvedValue('wamid.OUT.X'),
 }))
 
-const mockFrom = vi.fn()
-const mockSupabase = { from: mockFrom }
-
 vi.mock('@/lib/supabase/service', () => ({
-  createServiceClient: vi.fn(() => mockSupabase),
+  createServiceClient: vi.fn(() => ({ from: vi.fn() })),
 }))
 
 // Stub env vars
@@ -24,10 +19,16 @@ vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'http://localhost:54321')
 vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'service-role-key')
 
 // ---------------------------------------------------------------------------
-// Import after mocks
+// Import after mocks — then grab typed mock references
 // ---------------------------------------------------------------------------
 
 import { POST } from '@/app/api/reminders/send/route'
+import { sendTemplateMessage } from '@/lib/whatsapp/send'
+import { createServiceClient } from '@/lib/supabase/service'
+
+// Typed references to hoisted mocks
+const mockSendTemplateMessage = vi.mocked(sendTemplateMessage)
+const mockFrom = vi.fn()
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -119,7 +120,10 @@ beforeEach(() => {
   vi.useFakeTimers()
   vi.setSystemTime(FIXED_NOW)
   vi.clearAllMocks()
+  mockFrom.mockReset()
   mockSendTemplateMessage.mockResolvedValue('wamid.OUT.X')
+  // Wire mockFrom into the createServiceClient mock
+  vi.mocked(createServiceClient).mockReturnValue({ from: mockFrom } as unknown as ReturnType<typeof createServiceClient>)
 })
 
 afterEach(() => {
@@ -137,10 +141,11 @@ function setupHappyPath(opts: {
   tenant?: unknown
   updateCount?: number
 } = {}) {
-  const bookings = opts.bookings ?? [bookingFixture]
-  const phoneRow = opts.phoneRow ?? phoneRowFixture
-  const tpl = opts.tpl ?? templateFixture
-  const tenant = opts.tenant ?? tenantFixture
+  // Use 'in' check so callers can pass null explicitly to simulate missing rows
+  const bookings = 'bookings' in opts ? opts.bookings! : [bookingFixture]
+  const phoneRow = 'phoneRow' in opts ? opts.phoneRow : phoneRowFixture
+  const tpl = 'tpl' in opts ? opts.tpl : templateFixture
+  const tenant = 'tenant' in opts ? opts.tenant : tenantFixture
   const updateCount = opts.updateCount ?? 1
 
   // Build chains
@@ -247,14 +252,15 @@ describe('POST /api/reminders/send', () => {
     expect(payload.phoneNumberId).toBe(phoneRowFixture.phone_number_id)
     // components: body with 2 parameters
     expect(payload.components).toBeDefined()
-    expect(payload.components[0].type).toBe('body')
-    expect(payload.components[0].parameters).toHaveLength(2)
+    const components = payload.components!
+    expect(components[0].type).toBe('body')
+    expect(components[0].parameters).toHaveLength(2)
     // param[0] = datetime (should contain 'mai' for May)
-    expect(payload.components[0].parameters[0].type).toBe('text')
-    expect(payload.components[0].parameters[0].text).toEqual(expect.stringContaining('mai'))
+    expect(components[0].parameters![0].type).toBe('text')
+    expect(components[0].parameters![0].text).toEqual(expect.stringContaining('mai'))
     // param[1] = salon name
-    expect(payload.components[0].parameters[1].type).toBe('text')
-    expect(payload.components[0].parameters[1].text).toBe(tenantFixture.name)
+    expect(components[0].parameters![1].type).toBe('text')
+    expect(components[0].parameters![1].text).toBe(tenantFixture.name)
   })
 
   // --- No approved template → skip ---
