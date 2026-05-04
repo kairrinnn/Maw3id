@@ -155,6 +155,16 @@ Phase 5 (Templates & Reminders) is complete. Both plans delivered:
 - A "Submit template to Meta" button calling POST `/api/templates/submit` — route ready
 - A "Reminder status" panel reading `bookings.reminder_sent` — column already exists in schema
 
+## Self-Check: PASSED
+
+- FOUND: salon-bot/src/app/api/reminders/send/route.ts
+- FOUND: salon-bot/supabase/migrations/20260505000002_phase5_cron.sql
+- FOUND: salon-bot/.env.local.example
+- FOUND: .planning/phases/05-templates-reminders/05-02-SUMMARY.md
+- FOUND commit: d177000 (test RED)
+- FOUND commit: 77d2260 (feat GREEN)
+- FOUND commit: 31b3e6b (feat cron)
+
 ---
 *Phase: 05-templates-reminders*
-*Completed: 2026-05-04*
+*Completed: 2026-05-05*
