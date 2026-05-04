@@ -47,7 +47,7 @@ export interface WebhookPayload {
   entry: WebhookEntry[]
 }
 
-// Template message types — stub for Phase 5
+// Template message types
 export interface TemplateComponent {
   type: 'body' | 'header' | 'footer' | 'button'
   parameters?: Array<{ type: 'text'; text: string }>
@@ -57,5 +57,6 @@ export interface SendTemplatePayload {
   to: string
   templateName: string
   languageCode: string
+  phoneNumberId: string  // required for multi-tenant — each tenant has own phone_number_id
   components?: TemplateComponent[]
 }
