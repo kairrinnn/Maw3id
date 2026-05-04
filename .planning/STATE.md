@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Completed 04.5-02-PLAN.md — generateReply wired into route.ts, 104 tests passing
-last_updated: "2026-04-08T22:24:00.067Z"
-last_activity: 2026-04-08 — Completed 04.5-01 (reply.ts, ReplyContext, 15 new tests, 100 total passing)
+status: in_progress
+stopped_at: Completed 05-01-PLAN.md — sendTemplateMessage implemented, submit route live, 115 tests passing
+last_updated: "2026-05-04T18:10:00Z"
+last_activity: 2026-05-04 — Completed 05-01 (sendTemplateMessage, /api/templates/submit, seed migration, 17 new tests)
 progress:
   total_phases: 9
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 12
-  completed_plans: 6
-  percent: 56
+  completed_plans: 7
+  percent: 64
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-30)
 
 **Core value:** Un client peut réserver un créneau au salon à n'importe quelle heure, et le salon ne rate plus aucun rendez-vous faute de réponse manuelle.
-**Current focus:** Phase 4.5 — LLM Response Layer
+**Current focus:** Phase 5 — Templates & Reminders
 
 ## Current Position
 
-Phase: 4.5 of 8 (LLM Responses) — IN PROGRESS
-Plan: 1 of 2 in Phase 4.5 (04.5-01 complete, 04.5-02 pending)
-Status: 04.5-01 complete — ready for 04.5-02 (wire generateReply into route.ts)
-Last activity: 2026-04-08 — Completed 04.5-01 (reply.ts, ReplyContext, 15 new tests, 100 total passing)
+Phase: 5 of 8 (Templates & Reminders) — IN PROGRESS
+Plan: 1 of 2 in Phase 5 (05-01 complete, 05-02 pending)
+Status: 05-01 complete — ready for 05-02 (reminder scheduler: pg_cron + /api/reminders/send)
+Last activity: 2026-05-04 — Completed 05-01 (sendTemplateMessage, submit route, seed migration, 115 tests passing)
 
-Progress: [█████░░░░░] 56% (6 of ~11 plans complete across all phases)
+Progress: [██████░░░░] 64% (7 of ~11 plans complete across all phases)
 
 ## Performance Metrics
 
@@ -86,19 +86,24 @@ Recent decisions affecting current work:
 - [04.5-01]: vi.fn() constructor mock uses regular function (not arrow) for new-able classes
 - [Phase 04.5-02]: tenants.name fetched as separate query (not JOIN) — Supabase JS client idiomatic with .from() chaining
 - [Phase 04.5-02]: All client-facing messages now go through generateReply() — single choke point for LLM reply quality
+- [05-01]: phoneNumberId required in SendTemplatePayload (not global env) — multi-tenant support, fetched from phone_numbers.phone_number_id
+- [05-01]: waba_id used for template submission to /{waba_id}/message_templates (not phone_number_id — different Meta IDs)
+- [05-01]: category locked to UTILITY for all 3 standard templates — appointment reminders are not MARKETING
+- [05-01]: example.body_text is nested array [[val1, val2]] — required by Meta for templates with {{n}} variables
 
 ### Pending Todos
 
-- Execute 04.5-02: wire generateReply() into route.ts, replacing hardcoded replyText from processIntent()
+- Execute 05-02: reminder scheduler — /api/reminders/send route + pg_cron migration
 
 ### Blockers/Concerns
 
 - Phase 3 flag: Benchmark Gemini Flash vs GPT-4o-mini on French/Darija input before committing to a provider
 - Phase 5 flag: Validate Meta template submission API and approval timing in sandbox before building automation
 - Phase 7 flag: Meta embedded signup / WABA onboarding API changes frequently — verify current docs before Phase 7
+- Pre-existing: llm-reply.test.ts "Gemini success" test failing (unrelated to 05-01, deferred)
 
 ## Session Continuity
 
-Last session: 2026-04-08T22:11:27.541Z
-Stopped at: Completed 04.5-02-PLAN.md — generateReply wired into route.ts, 104 tests passing
+Last session: 2026-05-04T18:10:00Z
+Stopped at: Completed 05-01-PLAN.md — sendTemplateMessage implemented, submit route live, 115 tests passing
 Resume file: None
