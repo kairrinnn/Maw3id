@@ -1,5 +1,5 @@
 import { buildSystemPrompt } from './prompts'
-import { tryGemini, tryOpenAI } from './models'
+import { tryAnthropic } from './models'
 import type { ConversationState, IntentResult, Service } from './types'
 
 const FALLBACK_INTENT: IntentResult = {
@@ -10,11 +10,6 @@ const FALLBACK_INTENT: IntentResult = {
   time_raw: null,
 }
 
-function hasRequiredFields(intent: IntentResult, step: string): boolean {
-  if (step === 'awaiting_service') return intent.service_name !== null
-  if (step === 'awaiting_datetime') return intent.date_raw !== null || intent.time_raw !== null
-  return true
-}
 
 export async function extractIntent(
   message: string,
@@ -25,13 +20,8 @@ export async function extractIntent(
 
   const prompt = buildSystemPrompt(services, state.step)
 
-  const cheap = await tryGemini(message, prompt)
-  if (cheap && cheap.confidence === 'high' && hasRequiredFields(cheap, state.step)) {
-    return cheap
-  }
-
-  const standard = await tryOpenAI(message, prompt)
-  if (standard) return standard
+  const result = await tryAnthropic(message, prompt)
+  if (result) return result
 
   return FALLBACK_INTENT
 }

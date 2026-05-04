@@ -1,3 +1,4 @@
+import Anthropic from '@anthropic-ai/sdk'
 import type { ReplyContext } from './types'
 
 export const REPLY_TIMEOUT_MS = 3000
@@ -30,6 +31,7 @@ Regles :
 - Interdit : "que puis-je vous proposer", "comment puis-je vous aider", "n hesitez pas", et toute formule generique de chatbot.
 - ${langInstruction}
 ${servicesRule}
+- Ne jamais mentionner de prix. Si le client demande un prix, dis-lui de contacter le salon.
 - Texte brut. Pas d'emojis, pas de markdown.
 - Ne jamais reveler que tu es une IA.
 - Une expression darija (inshallah, mabrook) au maximum, seulement si vraiment naturelle.`
@@ -87,26 +89,16 @@ export function buildReplyPrompt(context: ReplyContext): string {
   return `${prompt}\n\nLe client a ecrit: '${context.userMessage}'`
 }
 
-async function callGroqForReply(context: ReplyContext): Promise<string | undefined> {
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.GROQ_API_KEY!}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages: [
-        { role: 'system', content: buildReplySystemPrompt(context.salonName, context.services ?? [], context.lang ?? 'fr') },
-        { role: 'user', content: buildReplyPrompt(context) },
-      ],
-      temperature: 0.3,
-      max_tokens: 80,
-    }),
+async function callHaikuForReply(context: ReplyContext): Promise<string | undefined> {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+  const message = await client.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 150,
+    system: buildReplySystemPrompt(context.salonName, context.services ?? [], context.lang ?? 'fr'),
+    messages: [{ role: 'user', content: buildReplyPrompt(context) }],
   })
-  if (!response.ok) throw new Error(`Groq error: ${response.status}`)
-  const data = await response.json()
-  return data.choices?.[0]?.message?.content?.trim() ?? undefined
+  const block = message.content[0]
+  return block.type === 'text' ? block.text.trim() : undefined
 }
 
 export async function generateReply(context: ReplyContext): Promise<string> {
@@ -117,12 +109,12 @@ export async function generateReply(context: ReplyContext): Promise<string> {
 
   try {
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Groq reply timeout')), REPLY_TIMEOUT_MS)
+      setTimeout(() => reject(new Error('Haiku reply timeout')), REPLY_TIMEOUT_MS)
     )
-    const result = await Promise.race([callGroqForReply(context), timeoutPromise])
+    const result = await Promise.race([callHaikuForReply(context), timeoutPromise])
     return result ?? fallback
   } catch (err) {
-    console.error('[reply] Groq reply failed, using fallback:', err)
+    console.error('[reply] Haiku reply failed, using fallback:', err)
     return fallback
   }
 }

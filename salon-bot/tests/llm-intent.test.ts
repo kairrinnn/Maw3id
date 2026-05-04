@@ -1,11 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { extractIntent } from '@/lib/llm/intent'
-import { tryGemini, tryOpenAI } from '@/lib/llm/models'
+import { tryAnthropic } from '@/lib/llm/models'
 import type { ConversationState, Service } from '@/lib/llm/types'
 
 vi.mock('@/lib/llm/models', () => ({
-  tryGemini: vi.fn(),
-  tryOpenAI: vi.fn(),
+  tryAnthropic: vi.fn(),
 }))
 
 describe('extractIntent', () => {
@@ -19,48 +18,19 @@ describe('extractIntent', () => {
     process.env.SKIP_LLM = 'false'
   })
 
-  it('Gemini returns confidence=high → OpenAI is NOT called', async () => {
-    vi.mocked(tryGemini).mockResolvedValue({
+  it('Anthropic returns result → used directly', async () => {
+    vi.mocked(tryAnthropic).mockResolvedValue({
       intent: 'greeting', confidence: 'high', service_name: null, date_raw: null, time_raw: null
     })
 
     const result = await extractIntent('bonjour', mockState, mockServices)
 
     expect(result.intent).toBe('greeting')
-    expect(tryGemini).toHaveBeenCalled()
-    expect(tryOpenAI).not.toHaveBeenCalled()
+    expect(tryAnthropic).toHaveBeenCalled()
   })
 
-  it('Gemini returns confidence=low → escalates to OpenAI', async () => {
-    vi.mocked(tryGemini).mockResolvedValue({
-      intent: 'book', confidence: 'low', service_name: 'coupe', date_raw: null, time_raw: null
-    })
-    vi.mocked(tryOpenAI).mockResolvedValue({
-      intent: 'book', confidence: 'high', service_name: 'coupe', date_raw: 'demain', time_raw: '15h'
-    })
-
-    const result = await extractIntent('coupe demain 15h', mockState, mockServices)
-
-    expect(result.confidence).toBe('high')
-    expect(tryGemini).toHaveBeenCalled()
-    expect(tryOpenAI).toHaveBeenCalled()
-  })
-
-  it('Gemini returns null (error) → escalates to OpenAI', async () => {
-    vi.mocked(tryGemini).mockResolvedValue(null)
-    vi.mocked(tryOpenAI).mockResolvedValue({
-      intent: 'greeting', confidence: 'high', service_name: null, date_raw: null, time_raw: null
-    })
-
-    const result = await extractIntent('bonjour', mockState, mockServices)
-
-    expect(result.intent).toBe('greeting')
-    expect(tryOpenAI).toHaveBeenCalled()
-  })
-
-  it('Both models return null → returns unknown fallback', async () => {
-    vi.mocked(tryGemini).mockResolvedValue(null)
-    vi.mocked(tryOpenAI).mockResolvedValue(null)
+  it('Anthropic returns null → fallback unknown', async () => {
+    vi.mocked(tryAnthropic).mockResolvedValue(null)
 
     const result = await extractIntent('?', mockState, mockServices)
 
@@ -72,22 +42,17 @@ describe('extractIntent', () => {
     const result = await extractIntent('bonjour', mockState, mockServices)
 
     expect(result.intent).toBe('unknown')
-    expect(tryGemini).not.toHaveBeenCalled()
+    expect(tryAnthropic).not.toHaveBeenCalled()
   })
 
-  it('Gemini high confidence but missing required field for step → escalates', async () => {
-    // Step is awaiting_service, but Gemini doesn't extract service_name
-    const state: ConversationState = { ...mockState, step: 'awaiting_service' }
-    vi.mocked(tryGemini).mockResolvedValue({
-      intent: 'book', confidence: 'high', service_name: null, date_raw: null, time_raw: null
-    })
-    vi.mocked(tryOpenAI).mockResolvedValue({
-      intent: 'book', confidence: 'high', service_name: 'Coupe', date_raw: null, time_raw: null
+  it('Anthropic extracts service_name correctly', async () => {
+    vi.mocked(tryAnthropic).mockResolvedValue({
+      intent: 'book', confidence: 'high', service_name: 'Coupe Homme', date_raw: 'demain', time_raw: '15h'
     })
 
-    const result = await extractIntent('je veux un service', state, mockServices)
+    const result = await extractIntent('coupe homme demain 15h', mockState, mockServices)
 
-    expect(result.service_name).toBe('Coupe')
-    expect(tryOpenAI).toHaveBeenCalled()
+    expect(result.service_name).toBe('Coupe Homme')
+    expect(result.date_raw).toBe('demain')
   })
 })
