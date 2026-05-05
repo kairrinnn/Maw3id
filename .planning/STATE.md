@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 06-00 (Wave 0 prerequisites)
-last_updated: "2026-05-05T21:11:27Z"
-last_activity: 2026-05-05 — Completed 06-00 (UNIQUE migration + 3 test scaffolds, 17 new placeholder tests)
+stopped_at: Completed 06-01 (services CRUD — actions + page + components)
+last_updated: "2026-05-05T22:20:29Z"
+last_activity: 2026-05-05 — Completed 06-01 (3 server actions, /services page, ServiceList, ServiceForm, 6 green tests)
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 14
-  completed_plans: 8
-  percent: 73
+  completed_plans: 9
+  percent: 75
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-30)
 ## Current Position
 
 Phase: 6 of 8 (Dashboard Admin) — IN PROGRESS
-Plan: 1 of 4 in Phase 6 — Plan 06-00 complete
-Status: Phase 6 in progress — Wave 0 complete, ready for Wave 1 (06-01, 06-02, 06-03)
-Last activity: 2026-05-05 — Completed 06-00 (UNIQUE migration + 3 test scaffolds, 17 new placeholder tests)
+Plan: 2 of 4 in Phase 6 — Plan 06-01 complete
+Status: Phase 6 in progress — Wave 1 plan 06-01 complete, ready for 06-02, 06-03
+Last activity: 2026-05-05 — Completed 06-01 (3 server actions, /services page, ServiceList, ServiceForm, 6 green tests)
 
 Progress: [████████░░] 75% (9 of ~14 plans complete across all phases)
 
@@ -98,10 +98,13 @@ Recent decisions affecting current work:
 - [05-02]: Test null-coalescing bug: null ?? fixture evaluates to fixture — use 'in' operator to distinguish explicit null from missing key
 - [06-00]: Idempotent UNIQUE migration via DO/IF NOT EXISTS block — Postgres lacks ADD CONSTRAINT IF NOT EXISTS for UNIQUE; DO block is the correct idiom
 - [06-00]: No @/ imports in Wave 0 test stubs — module-resolution fails before action files exist; stubs stay pure vitest until 06-01/02/03
+- [06-01]: deleteService updates active=false (soft-delete) — never hard DELETE — preserves bookings.service_id FK
+- [06-01]: useActionState from 'react' used (NOT useFormState from 'react-dom' — deprecated/removed in React 19 / Next.js 16)
+- [06-01]: ServiceList.tsx is the orchestrator — holds editing/confirmingDeleteId state and renders ServiceForm below the table
 
 ### Pending Todos
 
-- Execute Phase 6 Wave 1: plans 06-01, 06-02, 06-03 (services CRUD, schedules upsert, stats aggregation)
+- Execute Phase 6 Wave 1: plans 06-02, 06-03 (schedules upsert, stats aggregation)
 - Phase 7 onboarding setup: ALTER DATABASE postgres SET app.cron_secret and app.app_url before pg_cron migration apply
 - Phase 7 onboarding setup: ALTER DATABASE postgres SET app.cron_secret and app.app_url before pg_cron migration apply
 
@@ -114,6 +117,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-05T21:11:27Z
-Stopped at: Completed 06-00-PLAN.md (Wave 0 prerequisites)
-Resume file: .planning/phases/06-dashboard-admin/06-01-PLAN.md
+Last session: 2026-05-05T22:20:29Z
+Stopped at: Completed 06-01-PLAN.md (services CRUD — actions + page + components)
+Resume file: .planning/phases/06-dashboard-admin/06-02-PLAN.md
