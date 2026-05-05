@@ -1,33 +1,46 @@
 import { describe, it, expect } from 'vitest'
+import { getWeekBoundsCasablanca, getMonthBoundsCasablanca, formatMad, sumRevenue } from '@/lib/dashboard/stats'
 
 describe('DASH-03: Booking stats aggregation', () => {
-  it('counts only bookings with status="confirmed" in window', () => {
-    // Replaced in plan 06-03: assert query has .eq('status', 'confirmed')
-    expect(true).toBe(true)
+  it('week bound is Monday 00:00 Casablanca (Thursday test date)', () => {
+    // 2026-05-07T10:00:00Z = Thursday 11:00 Casablanca
+    // Monday of that week = 2026-05-04 00:00 Casablanca = 2026-05-03 23:00 UTC
+    const result = getWeekBoundsCasablanca(new Date('2026-05-07T10:00:00Z'))
+    expect(result.startIso).toBe('2026-05-03T23:00:00.000Z')
   })
 
-  it('week window starts Monday 00:00 Africa/Casablanca (UTC+1, no DST)', () => {
-    // Replaced in plan 06-03: assert weekStart ISO matches expected boundary
-    expect(true).toBe(true)
+  it('month bound is day 1 00:00 Casablanca', () => {
+    // 2026-05-15T12:00:00Z = May 15, 13:00 Casablanca
+    // May 1 00:00 Casablanca = April 30 23:00 UTC
+    const result = getMonthBoundsCasablanca(new Date('2026-05-15T12:00:00Z'))
+    expect(result.startIso).toBe('2026-04-30T23:00:00.000Z')
   })
 
-  it('month window starts day 1 00:00 Africa/Casablanca', () => {
-    // Replaced in plan 06-03: assert monthStart ISO matches expected boundary
-    expect(true).toBe(true)
+  it('Sunday week bound rolls to previous Monday', () => {
+    // 2026-05-10T12:00:00Z = Sunday 13:00 Casablanca
+    // Previous Monday = 2026-05-04 00:00 Casablanca = 2026-05-03 23:00 UTC
+    const result = getWeekBoundsCasablanca(new Date('2026-05-10T12:00:00Z'))
+    expect(result.startIso).toBe('2026-05-03T23:00:00.000Z')
   })
 
-  it('revenue sums services.price_mad, treats null as 0', () => {
-    // Replaced in plan 06-03: assert reduce skips null prices, returns Number total
-    expect(true).toBe(true)
+  it('formatMad zero state and French locale formatting', () => {
+    expect(formatMad(0)).toBe('0 MAD')
+    // Non-breaking space (U+00A0) or regular space — locale impl detail across Node versions
+    expect(formatMad(2800)).toMatch(/^2\s?800 MAD$/)
+    expect(formatMad(150)).toBe('150 MAD')
   })
 
-  it('revenue formatter uses fr-FR locale with no decimals', () => {
-    // Replaced in plan 06-03: assert "2 800 MAD" output for 2800, "0 MAD" for 0
-    expect(true).toBe(true)
+  it('sumRevenue treats null prices as zero', () => {
+    const result = sumRevenue([
+      { services: { price_mad: 100 } },
+      { services: { price_mad: null } },
+      { services: { price_mad: 50 } },
+    ])
+    expect(result).toBe(150)
   })
 
-  it('counts and revenue are zero when no confirmed bookings exist', () => {
-    // Replaced in plan 06-03: edge case — empty array
-    expect(true).toBe(true)
+  it('sumRevenue handles empty array AND array-shaped relation', () => {
+    expect(sumRevenue([])).toBe(0)
+    expect(sumRevenue([{ services: [{ price_mad: 200 }] }])).toBe(200)
   })
 })
