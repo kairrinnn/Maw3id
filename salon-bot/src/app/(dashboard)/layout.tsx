@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { DashboardNav } from '@/components/dashboard/DashboardNav'
 
 export default async function DashboardLayout({
   children,
@@ -19,8 +20,9 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="border-b bg-white px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-gray-900">Salon Bot</h1>
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-6">
+          <h1 className="text-xl font-semibold text-gray-900">Salon Bot</h1>
+          <DashboardNav />
           <form action="/api/auth/signout" method="POST">
             <button
               type="submit"

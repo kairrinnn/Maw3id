@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Completed 06-01 (services CRUD — actions + page + components)
-last_updated: "2026-05-05T22:20:29Z"
+status: executing
+stopped_at: Completed 06-02-PLAN.md (schedules upsert action + ScheduleForm component)
+last_updated: "2026-05-05T21:23:09.594Z"
 last_activity: 2026-05-05 — Completed 06-01 (3 server actions, /services page, ServiceList, ServiceForm, 6 green tests)
 progress:
   total_phases: 9
   completed_phases: 4
-  total_plans: 14
-  completed_plans: 9
+  total_plans: 18
+  completed_plans: 11
   percent: 75
 ---
 
@@ -57,6 +57,7 @@ Progress: [████████░░] 75% (9 of ~14 plans complete across a
 *Updated after each plan completion*
 | Phase 05-templates-reminders P02 | 15 | 3 tasks | 4 files |
 | Phase 06-dashboard-admin P00 | 2 | 3 tasks | 4 files |
+| Phase 06-dashboard-admin P02 | 7 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,9 @@ Recent decisions affecting current work:
 - [06-01]: deleteService updates active=false (soft-delete) — never hard DELETE — preserves bookings.service_id FK
 - [06-01]: useActionState from 'react' used (NOT useFormState from 'react-dom' — deprecated/removed in React 19 / Next.js 16)
 - [06-01]: ServiceList.tsx is the orchestrator — holds editing/confirmingDeleteId state and renders ServiceForm below the table
+- [Phase 06-dashboard-admin]: saveSchedules upsert with onConflict:'tenant_id,day_of_week' — requires schedules_tenant_day_unique from 06-00; 42P10 if constraint missing
+- [Phase 06-dashboard-admin]: useActionState (React 19 react package) used in ScheduleForm — useFormState from react-dom is deprecated
+- [Phase 06-dashboard-admin]: closed=true days send hidden 00:00 inputs so server always receives 7 rows — no conditional missing-day logic in action
 
 ### Pending Todos
 
@@ -117,6 +121,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-05T22:20:29Z
-Stopped at: Completed 06-01-PLAN.md (services CRUD — actions + page + components)
-Resume file: .planning/phases/06-dashboard-admin/06-02-PLAN.md
+Last session: 2026-05-05T21:23:09.573Z
+Stopped at: Completed 06-02-PLAN.md (schedules upsert action + ScheduleForm component)
+Resume file: None
