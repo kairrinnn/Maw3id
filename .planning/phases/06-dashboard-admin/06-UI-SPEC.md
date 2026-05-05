@@ -54,11 +54,16 @@ Exceptions:
 | Role | Size | Weight | Line Height | Tailwind Class | Usage |
 |------|------|--------|-------------|----------------|-------|
 | Body | 14px | 400 | 1.5 | `text-sm` | Table cell content, form helper text, status badges |
-| Label | 14px | 500 | 1.4 | `text-sm font-medium` | Form labels, table column headers, nav links |
-| Heading | 20px | 600 | 1.3 | `text-xl font-semibold` | Page titles (Services, Horaires), section headings |
-| Display | 28px | 700 | 1.2 | `text-3xl font-bold` | Stat card primary number (e.g. "14 RDV") |
+| Label | 14px | 600 | 1.4 | `text-sm font-semibold` | Form labels, table column headers, nav links |
+| Heading | 20px | 600 | 1.3 | `text-xl font-semibold` | Section headings (ServiceForm, ScheduleForm) |
+| Page Title | 24px | 600 | 1.2 | `text-2xl font-semibold` | Page titles — "Mes services", "Horaires d'ouverture", tenant name heading |
+| Display | 28px | 600 | 1.2 | `text-3xl font-semibold` | Stat card primary number (e.g. "14 RDV") |
 
-Source: inferred from existing dashboard page (`text-2xl font-bold`, `text-lg font-medium`, `text-sm`) — normalized to a strict 4-size system.
+Exactly 4 distinct sizes: 14px, 20px, 24px, 28px. Exactly 2 weights: 400 (body) and 600 (all emphasis). Size alone provides the display hierarchy — weight 700 is not used.
+
+Source: inferred from existing dashboard page — normalized to a strict 4-size, 2-weight system. `text-lg` (18px) removed; all former `text-lg` usages promoted to `text-xl` (20px, Heading role). `font-bold` and `font-medium` unified to `font-semibold` throughout.
+
+**Focal point declaration — /dashboard:** Primary visual anchor is the 2-column stats grid. StatsCard numbers (Display / 28px / `text-3xl font-semibold`) are the first element the eye should land on. All other content on /dashboard is visually subordinate to these numbers.
 
 ---
 
@@ -91,8 +96,8 @@ These are the new components Phase 6 introduces. Each is hand-rolled Tailwind �
 
 Visual spec:
 - Container: `rounded-lg border border-gray-200 bg-white p-6`
-- Period label (top): `text-sm font-medium text-gray-500` — e.g. "Cette semaine"
-- Primary number: `text-3xl font-bold text-gray-900 mt-1` — e.g. "14" or "2 800 MAD"
+- Period label (top): `text-sm font-semibold text-gray-500` — e.g. "Cette semaine"
+- Primary number: `text-3xl font-semibold text-gray-900 mt-1` — e.g. "14" or "2 800 MAD"
 - Sub-label (bottom): `text-sm text-gray-500 mt-1` — e.g. "réservations confirmées"
 - Layout: 2-column grid on desktop (`grid grid-cols-2 gap-6`), stacked on mobile
 
@@ -105,14 +110,14 @@ Four cards total: bookings this week, bookings this month, revenue this week, re
 
 Visual spec:
 - Outer container: `rounded-lg border border-gray-200 bg-white overflow-hidden`
-- Table header: `bg-gray-50 border-b border-gray-200`, cells use `text-sm font-medium text-gray-700 px-4 py-3`
+- Table header: `bg-gray-50 border-b border-gray-200`, cells use `text-sm font-semibold text-gray-700 px-4 py-3`
 - Table rows: `border-b border-gray-100 last:border-0`, cells use `text-sm text-gray-900 px-4 py-3`
 - Row hover: `hover:bg-gray-50`
 - Columns: Nom | Durée | Prix (MAD) | Actions
 - Duration display: `{N} min` — e.g. "60 min"
 - Price display: `{N} MAD` — e.g. "150 MAD" — if null: "— " (em dash)
-- Edit button: `text-sm text-blue-600 hover:text-blue-800 font-medium min-h-[44px] px-2`
-- Delete button: `text-sm text-red-600 hover:text-red-800 font-medium min-h-[44px] px-2 ml-2`
+- Edit button: `text-sm text-blue-600 hover:text-blue-800 font-semibold min-h-[44px] px-2`
+- Delete button: `text-sm text-red-600 hover:text-red-800 font-semibold min-h-[44px] px-2 ml-2`
 
 ### 3. ServiceForm (add / edit)
 
@@ -121,24 +126,24 @@ Visual spec:
 
 Visual spec:
 - Container: `rounded-lg border border-gray-200 bg-white p-6 mt-6`
-- Section heading: `text-lg font-semibold text-gray-900 mb-4` — "Ajouter un service" or "Modifier le service"
+- Section heading: `text-xl font-semibold text-gray-900 mb-4` — "Ajouter un service" or "Modifier le service"
 - Field layout: 3-column grid on desktop (`grid grid-cols-3 gap-4`), stacked on mobile
-- Label: `block text-sm font-medium text-gray-700 mb-1`
+- Label: `block text-sm font-semibold text-gray-700 mb-1`
 - Input: `block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500` — matches existing login input pattern exactly
 - Error text below field: `mt-1 text-xs text-red-600`
-- Submit button: `mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50`
-- Cancel button (edit mode only): `mt-4 ml-3 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50`
+- Submit button: `mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50`
+- Cancel button (edit mode only): `mt-4 ml-3 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50`
 - Pending state: button shows "Enregistrement..." — text change only, no spinner
 
 ### 4. DeleteConfirmation (inline)
 
 **Location:** inline inside ServiceList row — not a separate component
 **Purpose:** Confirm destructive delete before executing.
-**Pattern:** Two-step inline — first click shows confirmation text + "Oui, supprimer" / "Annuler" in the same row, replaces the action buttons. No modal.
+**Pattern:** Two-step inline — first click shows confirmation text + "Oui, supprimer" / "Garder le service" in the same row, replaces the action buttons. No modal.
 
 Visual spec:
 - Confirmation text: `text-sm text-red-600 mr-2` — "Supprimer ce service ?"
-- Confirm button: `text-sm font-medium text-red-700 hover:text-red-900 min-h-[44px] px-2`
+- Confirm button: `text-sm font-semibold text-red-700 hover:text-red-900 min-h-[44px] px-2`
 - Cancel button: `text-sm text-gray-600 hover:text-gray-900 min-h-[44px] px-2 ml-2`
 
 ### 5. ScheduleForm (7-row grid)
@@ -149,12 +154,12 @@ Visual spec:
 Visual spec:
 - Outer container: `rounded-lg border border-gray-200 bg-white overflow-hidden`
 - Row: `flex items-center gap-4 px-4 py-3 border-b border-gray-100 last:border-0 min-h-[48px]`
-- Day name column: `text-sm font-medium text-gray-900 w-28 shrink-0` — French day names (Lundi, Mardi … Dimanche)
+- Day name column: `text-sm font-semibold text-gray-900 w-28 shrink-0` — French day names (Lundi, Mardi … Dimanche)
 - Closed checkbox: `h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500` — label `text-sm text-gray-600 ml-2`
 - Time inputs (hidden when closed=true): `rounded-md border border-gray-300 px-2 py-1 text-sm w-28 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`
 - "à" separator between open/close times: `text-sm text-gray-500`
 - Closed row state: time inputs hidden, row background `bg-gray-50`, day name `text-gray-400`
-- Save all button (below table): `mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50`
+- Save all button (below table): `mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50`
 - One save action submits all 7 rows simultaneously via Server Action
 
 ### 6. Nav links in DashboardLayout
@@ -166,7 +171,7 @@ Visual spec:
 - Nav container: existing `border-b bg-white px-6 py-4` — keep as-is
 - Add nav links between logo and Déconnexion button: `flex items-center gap-6`
 - Link style: `text-sm text-gray-600 hover:text-gray-900`
-- Active link: `text-sm font-medium text-gray-900 underline underline-offset-4`
+- Active link: `text-sm font-semibold text-gray-900 underline underline-offset-4`
 - Links: Tableau de bord (`/dashboard`), Services (`/services`), Horaires (`/schedules`)
 
 ---
@@ -176,7 +181,7 @@ Visual spec:
 ### /dashboard (extended)
 
 Structure:
-1. Page heading: `text-2xl font-bold text-gray-900` — tenant name (existing)
+1. Page heading: `text-2xl font-semibold text-gray-900` — tenant name (existing)
 2. Bot status card (existing) — keep unchanged
 3. New section: 2-column stats grid — `grid grid-cols-2 gap-6 mt-6`
    - StatsCard: "Cette semaine" / bookings count
@@ -188,14 +193,14 @@ Structure:
 ### /services
 
 Structure:
-1. Page heading: `text-2xl font-bold text-gray-900 mb-6` — "Mes services"
+1. Page heading: `text-2xl font-semibold text-gray-900 mb-6` — "Mes services"
 2. ServiceList table (full width)
 3. ServiceForm below (add mode by default; switches to edit mode when edit clicked)
 
 ### /schedules
 
 Structure:
-1. Page heading: `text-2xl font-bold text-gray-900 mb-6` — "Horaires d'ouverture"
+1. Page heading: `text-2xl font-semibold text-gray-900 mb-6` — "Horaires d'ouverture"
 2. Helper text: `text-sm text-gray-600 mb-4` — "Définissez vos horaires pour chaque jour de la semaine."
 3. ScheduleForm (full width, 7 rows)
 4. Save button below the form
@@ -223,10 +228,10 @@ All copy in French. No English. No emojis in copy.
 | Success flash — schedules | "Horaires enregistrés." | Inline below save button, auto-dismiss after 3s |
 | Pending — add service | "Enregistrement..." | Button text while Server Action pending |
 | Pending — save schedules | "Enregistrement..." | Button text while Server Action pending |
-| Delete — first click | "Supprimer" | Delete button label in row |
+| Delete — first click | "Supprimer ce service" | Delete button label in row |
 | Delete — confirmation | "Supprimer ce service ?" | Confirmation prompt replacing action buttons |
 | Delete — confirm action | "Oui, supprimer" | Confirmation accept button |
-| Delete — cancel | "Annuler" | Confirmation cancel button |
+| Delete — cancel | "Garder le service" | Confirmation cancel button — noun-anchored, outcome is clear |
 | Destructive success flash | "Service supprimé." | After soft-delete, auto-dismiss after 3s |
 | Schedule — closed toggle label | "Fermé" | Checkbox label in each schedule row |
 | Schedule helper text | "Définissez vos horaires pour chaque jour de la semaine." | Below page heading on /schedules |
@@ -262,7 +267,7 @@ Day names in ScheduleForm (day_of_week 0–6 mapping):
 4. On success: ServiceList refreshes (revalidatePath), ServiceForm clears, shows "Service enregistré." flash below form for 3s
 5. On error: error text appears below the form heading, button re-enables, inputs retain values
 6. Owner clicks "Modifier" on a row → ServiceForm switches to edit mode, pre-fills inputs, heading changes to "Modifier le service", cancel button appears
-7. Owner clicks "Supprimer" → inline two-step confirmation appears (replaces action buttons in that row)
+7. Owner clicks "Supprimer ce service" → inline two-step confirmation appears (replaces action buttons in that row)
 8. Owner confirms → button shows pending state → on success row disappears, "Service supprimé." flash below ServiceList for 3s
 
 ### Schedule save flow
@@ -298,7 +303,7 @@ Day names in ScheduleForm (day_of_week 0–6 mapping):
 
 - All form inputs have associated `<label>` elements (not placeholder-only labels)
 - Error messages are rendered in the DOM as `<p>` text — not toast-only
-- Delete confirmation must be keyboard-navigatable (tab between "Oui, supprimer" and "Annuler")
+- Delete confirmation must be keyboard-navigatable (tab between "Oui, supprimer" and "Garder le service")
 - Touch targets for row action buttons: minimum 44px height
 - Color is not the only conveyor of state — error states have both red color and text message; success states have both green color and text message
 - Schedule "Fermé" checkbox has `id` and `htmlFor` pairing
