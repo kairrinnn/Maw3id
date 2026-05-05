@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-02-PLAN.md (schedules upsert action + ScheduleForm component)
-last_updated: "2026-05-05T21:23:09.594Z"
+stopped_at: Completed 06-03-PLAN.md (stats helpers + StatsCard + DashboardNav + stats grid)
+last_updated: "2026-05-05T21:25:07.394Z"
 last_activity: 2026-05-05 — Completed 06-01 (3 server actions, /services page, ServiceList, ServiceForm, 6 green tests)
 progress:
   total_phases: 9
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 18
-  completed_plans: 11
+  completed_plans: 12
   percent: 75
 ---
 
@@ -58,6 +58,7 @@ Progress: [████████░░] 75% (9 of ~14 plans complete across a
 | Phase 05-templates-reminders P02 | 15 | 3 tasks | 4 files |
 | Phase 06-dashboard-admin P00 | 2 | 3 tasks | 4 files |
 | Phase 06-dashboard-admin P02 | 7 | 2 tasks | 4 files |
+| Phase 06-dashboard-admin P03 | 11 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,10 @@ Recent decisions affecting current work:
 - [Phase 06-dashboard-admin]: saveSchedules upsert with onConflict:'tenant_id,day_of_week' — requires schedules_tenant_day_unique from 06-00; 42P10 if constraint missing
 - [Phase 06-dashboard-admin]: useActionState (React 19 react package) used in ScheduleForm — useFormState from react-dom is deprecated
 - [Phase 06-dashboard-admin]: closed=true days send hidden 00:00 inputs so server always receives 7 rows — no conditional missing-day logic in action
+- [Phase 06-03]: CASABLANCA_OFFSET_MS = 60 * 60 * 1000 constant — Morocco UTC+1, no DST, consistent with Phase 5 reminder route
+- [Phase 06-03]: sumRevenue handles both object and array Supabase join shapes via Array.isArray — JS cardinality detection varies
+- [Phase 06-03]: .eq('status', 'confirmed') enforced on stats queries — excludes cancelled/no_show/completed from revenue (Pitfall 4)
+- [Phase 06-03]: StatsCard is a Server Component (no use client) — no interactivity needed, avoids client bundle cost
 
 ### Pending Todos
 
@@ -121,6 +126,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-05T21:23:09.573Z
-Stopped at: Completed 06-02-PLAN.md (schedules upsert action + ScheduleForm component)
+Last session: 2026-05-05T21:25:07.387Z
+Stopped at: Completed 06-03-PLAN.md (stats helpers + StatsCard + DashboardNav + stats grid)
 Resume file: None
