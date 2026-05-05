@@ -114,7 +114,12 @@ Plans:
   1. A salon owner can create, edit, and delete services (name, duration, price) from the dashboard
   2. A salon owner can define opening hours and mark specific days as closed
   3. The dashboard displays total bookings and estimated revenue for the current week and month
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [ ] 06-00-PLAN.md — Wave 0: UNIQUE constraint migration + 3 Vitest scaffold files (prerequisite for upsert + TDD)
+- [ ] 06-01-PLAN.md — Services CRUD: createService/updateService/deleteService actions + /services page + ServiceList + ServiceForm (DASH-01)
+- [ ] 06-02-PLAN.md — Schedules: saveSchedules upsert action + /schedules page + ScheduleForm 7-row grid (DASH-02)
+- [ ] 06-03-PLAN.md — Stats: pure stats helpers + StatsCard + DashboardNav + stats grid wired into /dashboard (DASH-03)
 
 ### Phase 7: Onboarding Flow
 **Goal**: A new salon can go from account creation to a live bot on WhatsApp through a guided flow, including a test mode before go-live
@@ -150,6 +155,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.5 -> 5 -> 6 -> 7 -> 8
 | 4. Booking Core | 1/1 | Complete | 2026-04-07 |
 | 4.5. LLM Responses | 2/2 | Complete   | 2026-04-08 |
 | 5. Templates & Reminders | 2/2 | Complete   | 2026-05-05 |
-| 6. Dashboard Admin | 0/? | Not started | - |
+| 6. Dashboard Admin | 0/4 | Planned | - |
 | 7. Onboarding Flow | 0/? | Not started | - |
 | 8. Offres & Facturation | 0/? | Not started | - |
