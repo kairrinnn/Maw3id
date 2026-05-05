@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-stopped_at: Completed 05-02-PLAN.md — /api/reminders/send with idempotency, pg_cron migration, 124 tests passing
-last_updated: "2026-05-05T00:00:00Z"
-last_activity: 2026-05-05 — Completed 05-02 (reminder send route, pg_cron migration, 10 new tests, Phase 5 complete)
+status: completed
+stopped_at: Completed 06-00 (Wave 0 prerequisites)
+last_updated: "2026-05-05T21:11:27Z"
+last_activity: 2026-05-05 — Completed 06-00 (UNIQUE migration + 3 test scaffolds, 17 new placeholder tests)
 progress:
   total_phases: 9
-  completed_phases: 5
-  total_plans: 12
+  completed_phases: 4
+  total_plans: 14
   completed_plans: 8
   percent: 73
 ---
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-30)
 
 **Core value:** Un client peut réserver un créneau au salon à n'importe quelle heure, et le salon ne rate plus aucun rendez-vous faute de réponse manuelle.
-**Current focus:** Phase 5 — Templates & Reminders
+**Current focus:** Phase 6 — Dashboard Admin
 
 ## Current Position
 
-Phase: 5 of 8 (Templates & Reminders) — COMPLETE
-Plan: 2 of 2 in Phase 5 — BOTH PLANS DONE
-Status: Phase 5 complete — ready for Phase 6 (Dashboard Admin)
-Last activity: 2026-05-05 — Completed 05-02 (/api/reminders/send, pg_cron migration, 124/125 tests passing)
+Phase: 6 of 8 (Dashboard Admin) — IN PROGRESS
+Plan: 1 of 4 in Phase 6 — Plan 06-00 complete
+Status: Phase 6 in progress — Wave 0 complete, ready for Wave 1 (06-01, 06-02, 06-03)
+Last activity: 2026-05-05 — Completed 06-00 (UNIQUE migration + 3 test scaffolds, 17 new placeholder tests)
 
-Progress: [███████░░░] 73% (8 of ~11 plans complete across all phases)
+Progress: [████████░░] 75% (9 of ~14 plans complete across all phases)
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [███████░░░] 73% (8 of ~11 plans complete across a
 
 *Updated after each plan completion*
 | Phase 05-templates-reminders P02 | 15 | 3 tasks | 4 files |
+| Phase 06-dashboard-admin P00 | 2 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -95,10 +96,13 @@ Recent decisions affecting current work:
 - [05-02]: Africa/Casablanca timezone hardcoded — Morocco-only product, no multi-timezone requirement
 - [05-02]: pg_cron secrets via current_setting('app.cron_secret') — no literal secrets in migration SQL (git-safe)
 - [05-02]: Test null-coalescing bug: null ?? fixture evaluates to fixture — use 'in' operator to distinguish explicit null from missing key
+- [06-00]: Idempotent UNIQUE migration via DO/IF NOT EXISTS block — Postgres lacks ADD CONSTRAINT IF NOT EXISTS for UNIQUE; DO block is the correct idiom
+- [06-00]: No @/ imports in Wave 0 test stubs — module-resolution fails before action files exist; stubs stay pure vitest until 06-01/02/03
 
 ### Pending Todos
 
-- Execute Phase 6: Dashboard Admin
+- Execute Phase 6 Wave 1: plans 06-01, 06-02, 06-03 (services CRUD, schedules upsert, stats aggregation)
+- Phase 7 onboarding setup: ALTER DATABASE postgres SET app.cron_secret and app.app_url before pg_cron migration apply
 - Phase 7 onboarding setup: ALTER DATABASE postgres SET app.cron_secret and app.app_url before pg_cron migration apply
 
 ### Blockers/Concerns
@@ -110,6 +114,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-05T00:00:00Z
-Stopped at: Completed 05-02-PLAN.md — /api/reminders/send with idempotency, pg_cron migration, Phase 5 complete, 124 tests passing
-Resume file: None
+Last session: 2026-05-05T21:11:27Z
+Stopped at: Completed 06-00-PLAN.md (Wave 0 prerequisites)
+Resume file: .planning/phases/06-dashboard-admin/06-01-PLAN.md

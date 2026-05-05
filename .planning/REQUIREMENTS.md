@@ -43,9 +43,9 @@
 
 ### Dashboard Admin
 
-- [ ] **DASH-01**: Gérant peut créer/modifier/supprimer les services (nom, durée, prix)
-- [ ] **DASH-02**: Gérant peut définir les horaires d'ouverture et les jours de fermeture
-- [ ] **DASH-03**: Dashboard affiche les stats simples : nombre de bookings et revenus estimés par période (semaine/mois)
+- [x] **DASH-01**: Gérant peut créer/modifier/supprimer les services (nom, durée, prix)
+- [x] **DASH-02**: Gérant peut définir les horaires d'ouverture et les jours de fermeture
+- [x] **DASH-03**: Dashboard affiche les stats simples : nombre de bookings et revenus estimés par période (semaine/mois)
 
 ### Onboarding Salon
 
@@ -122,9 +122,9 @@
 | BOOK-07 | Phase 4 | Pending |
 | TPL-01 | Phase 5 | Complete |
 | TPL-02 | Phase 5 | Complete |
-| DASH-01 | Phase 6 | Pending |
-| DASH-02 | Phase 6 | Pending |
-| DASH-03 | Phase 6 | Pending |
+| DASH-01 | Phase 6 | Complete |
+| DASH-02 | Phase 6 | Complete |
+| DASH-03 | Phase 6 | Complete |
 | ONB-01 | Phase 7 | Pending |
 | ONB-02 | Phase 7 | Pending |
 | ONB-03 | Phase 7 | Pending |

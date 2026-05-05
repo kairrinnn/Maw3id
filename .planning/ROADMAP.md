@@ -114,7 +114,7 @@ Plans:
   1. A salon owner can create, edit, and delete services (name, duration, price) from the dashboard
   2. A salon owner can define opening hours and mark specific days as closed
   3. The dashboard displays total bookings and estimated revenue for the current week and month
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 Plans:
 - [ ] 06-00-PLAN.md — Wave 0: UNIQUE constraint migration + 3 Vitest scaffold files (prerequisite for upsert + TDD)
 - [ ] 06-01-PLAN.md — Services CRUD: createService/updateService/deleteService actions + /services page + ServiceList + ServiceForm (DASH-01)
@@ -155,6 +155,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.5 -> 5 -> 6 -> 7 -> 8
 | 4. Booking Core | 1/1 | Complete | 2026-04-07 |
 | 4.5. LLM Responses | 2/2 | Complete   | 2026-04-08 |
 | 5. Templates & Reminders | 2/2 | Complete   | 2026-05-05 |
-| 6. Dashboard Admin | 0/4 | Planned | - |
+| 6. Dashboard Admin | 1/4 | In Progress|  |
 | 7. Onboarding Flow | 0/? | Not started | - |
 | 8. Offres & Facturation | 0/? | Not started | - |
