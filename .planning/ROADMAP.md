@@ -130,7 +130,12 @@ Plans:
   2. An admin can connect a WhatsApp number to the salon, choosing between a dedicated number or coexistence
   3. The bot can be activated in sandbox/test mode on a test number before going live on the production number
   4. The bot remains inactive until minimum configuration (at least one service and one open day) is confirmed
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [ ] 07-00-PLAN.md — Wave 0: schema migration (tenants.description, phone_numbers UNIQUE, bot_configs.test_mode) + Vitest stubs
+- [ ] 07-01-PLAN.md — Server actions: saveSalonProfile, savePhoneNumber, activateBot + readiness gate lib (ONB-01/02/03, WA-04)
+- [ ] 07-02-PLAN.md — Wizard pages /onboarding/1-4 + layout + middleware guard + sequential step guards (ONB-01/02/03)
+- [ ] 07-03-PLAN.md — Dashboard integration: bot status banner + DashboardNav Configuration link + human verification (ONB-01/03)
 
 ### Phase 8: Offres & Facturation
 **Goal**: Each salon is on a subscription plan, the bot stops responding when the plan expires, and billing is handled automatically via Stripe
@@ -156,5 +161,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.5 -> 5 -> 6 -> 7 -> 8
 | 4.5. LLM Responses | 2/2 | Complete   | 2026-04-08 |
 | 5. Templates & Reminders | 2/2 | Complete   | 2026-05-05 |
 | 6. Dashboard Admin | 4/4 | Complete   | 2026-05-05 |
-| 7. Onboarding Flow | 0/? | Not started | - |
+| 7. Onboarding Flow | 0/4 | Not started | - |
 | 8. Offres & Facturation | 0/? | Not started | - |
